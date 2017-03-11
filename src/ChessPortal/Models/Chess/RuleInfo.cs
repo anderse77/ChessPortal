@@ -27,5 +27,27 @@ namespace ChessPortal.Models.Chess
             {Piece.Queen, false},
             {Piece.Rook, false}
         };
+
+        public static Dictionary<Color, Direction[]> PawnCaptureDirections = new Dictionary<Color, Direction[]>
+        {
+            {Color.White, new [] {Direction.Northeast, Direction.Northwest}},
+            {Color.Black, new [] {Direction.Southeast, Direction.Southwest}}
+        };
+
+        public static Dictionary<Color, Direction> PawnMoveDirection = new Dictionary<Color, Direction>
+        {
+            {Color.White, Direction.North},
+            {Color.Black, Direction.South}
+        };
+
+        public static Dictionary<Piece, int> MaximumMoveLength = new Dictionary<Piece, int>
+        {
+            {Piece.Pawn, 1},
+            {Piece.King, 1},
+            {Piece.Knight, 1},
+            {Piece.Bishop, 7},
+            {Piece.Rook, 7},
+            {Piece.Queen, 7}
+        };
     }
 }

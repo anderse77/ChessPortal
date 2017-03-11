@@ -7,6 +7,7 @@ using Microsoft.VisualBasic.CompilerServices;
 
 namespace ChessPortal.Models.Chess
 {
+    [Flags]
     public enum Piece
     {
         Pawn,
@@ -17,6 +18,7 @@ namespace ChessPortal.Models.Chess
         King
     }
 
+    [Flags]
     public enum Color
     {
         Black,

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.VisualBasic.CompilerServices;
 
 namespace ChessPortal.Models.Chess
 {
@@ -170,6 +171,41 @@ namespace ChessPortal.Models.Chess
             FromY = fromY;
             ToY = toY;
             Color = color;
+        }
+
+        public override bool Equals(object obj)
+        {
+            Move move = obj as Move;
+            if (move == null)
+            {
+                return false;
+            }
+            return FromX == move.FromX && FromY == move.FromY && ToX == move.ToX && ToY == move.ToY;
+        }
+
+        public override int GetHashCode()
+        {
+            return FromX.GetHashCode() ^ FromY.GetHashCode() ^ ToX.GetHashCode() ^ ToY.GetHashCode();
+        }
+
+        public static bool operator ==(Move lhs, Move rhs)
+        {
+            if (ReferenceEquals(lhs, rhs))
+            {
+                return true;
+            }
+
+            if ((object) lhs == null || (object) rhs == null)
+            {
+                return false;
+            }
+
+            return lhs.FromX == rhs.FromX && lhs.FromY == rhs.FromY && lhs.ToX == rhs.ToX && lhs.ToY == rhs.ToY;
+        }
+
+        public static bool operator !=(Move lhs, Move rhs)
+        {
+            return !(lhs == rhs);
         }
     }
 }
