@@ -17,7 +17,7 @@ namespace ChessPortal.Entities
         public ChessPlayer AcceptingPlayer { get; set; }
         [ForeignKey("ChallengeId")]
         public ChallengeEntity Challenge { get; set; }
-        public int PlayerId { get; set; }
+        public string PlayerId { get; set; }
         public int ChallangeId { get; set; }
     }
 }

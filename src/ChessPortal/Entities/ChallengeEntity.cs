@@ -19,7 +19,7 @@ namespace ChessPortal.Entities
         public GameStatus Status { get; set; }
         [ForeignKey("PlayerId")]
         public ChessPlayer Player { get; set; }
-        public int PlayerId { get; set; }
+        public string PlayerId { get; set; }
 
     }
 }

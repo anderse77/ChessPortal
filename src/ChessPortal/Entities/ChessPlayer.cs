@@ -12,6 +12,6 @@ namespace ChessPortal.Entities
         public int NumberOfWonGames { get; set; }
         public int NumberOfLostGames { get; set; }
         public int NumberOfDrawnGames { get; set; }
-        public ICollection<ChallengeEntity> Challanges { get; set; }
+        public ICollection<ChallengeEntity> Challenges { get; set; }
     }
 }
