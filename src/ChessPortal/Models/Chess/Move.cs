@@ -7,6 +7,26 @@ using Microsoft.VisualBasic.CompilerServices;
 
 namespace ChessPortal.Models.Chess
 {
+    public enum Direction
+    {
+        North,
+        South,
+        East,
+        West,
+        Northeast,
+        Northwest,
+        Southeast,
+        Southwest,
+        Northnorthwest,
+        Northnortheast,
+        Southsouthwest,
+        Southsoutheast,
+        Eastnortheast,
+        Eastsoutheast,
+        Westnorthwest,
+        Westsouthwest,
+        Other
+    }
     public class Move
     {
         public Piece Piece { get; }
@@ -79,7 +99,7 @@ namespace ChessPortal.Models.Chess
 
                 if (differences[0] == 1 && differences[1] == 2)
                 {
-                    return Direction.Northortheast;
+                    return Direction.Northnortheast;
                 }
 
                 if (differences[0] == 2 && differences[1] == 1)
@@ -142,7 +162,7 @@ namespace ChessPortal.Models.Chess
                         return FromX - ToX;
                     case Direction.Northnorthwest:
                     case Direction.Eastnortheast:
-                    case Direction.Northortheast:
+                    case Direction.Northnortheast:
                     case Direction.Eastsoutheast:
                     case Direction.Westnorthwest:
                     case Direction.Southsoutheast:

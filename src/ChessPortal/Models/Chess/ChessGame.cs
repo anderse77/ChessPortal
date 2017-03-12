@@ -230,7 +230,7 @@ namespace ChessPortal.Models.Chess
                     GameStatus = newPosition.WhiteToMove ? GameStatus.BlackWins : GameStatus.WhiteWins;
                 }
 
-                if (IsDrawByThreeFoldRepetition() || IsDrawByFiftyMoveRule())
+                if (IsDrawByStalemate() && IsDrawByThreeFoldRepetition() || IsDrawByFiftyMoveRule())
                 {
                     GameStatus = GameStatus.Draw;
                 }
@@ -242,7 +242,14 @@ namespace ChessPortal.Models.Chess
 
         bool IsCheckMate()
         {
-            return GetValidMoveCandidates().All(m => History.Last().UpdateBoard(m).OwnKingIsLeftInCheck());
+            return History.Last().OwnKingIsLeftInCheck() &&
+                   GetValidMoveCandidates().All(m => History.Last().UpdateBoard(m).OwnKingIsLeftInCheck());
+        }
+
+        bool IsDrawByStalemate()
+        {
+            return !History.Last().OwnKingIsLeftInCheck() &&
+                   GetValidMoveCandidates().All(m => History.Last().UpdateBoard(m).OwnKingIsLeftInCheck());
         }
 
         bool IsDrawByThreeFoldRepetition()

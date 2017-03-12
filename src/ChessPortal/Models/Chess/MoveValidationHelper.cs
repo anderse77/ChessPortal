@@ -130,7 +130,7 @@ namespace ChessPortal.Models.Chess
                     return new[] { 1, 1 };
                 case Direction.Northnorthwest:
                     return new[] { -1, 2 };
-                case Direction.Northortheast:
+                case Direction.Northnortheast:
                     return new[] { 1, 2 };
                 case Direction.South:
                     return new[] { 0, -1 };
@@ -234,11 +234,6 @@ namespace ChessPortal.Models.Chess
                 : new[] {Direction.Southeast, Direction.Southwest,};
         }
 
-        static Direction GetValidPawnMoveDirection(Color pawnColor)
-        {
-            return pawnColor == Color.White ? Direction.North : Direction.South;
-        }
-
         static bool LastMoveEnablesEnPassant(Move move, Move lastMove)
         {
             return lastMove.Piece == Piece.Pawn && lastMove.Length == 2 && lastMove.ToY == move.FromY &&
@@ -261,11 +256,6 @@ namespace ChessPortal.Models.Chess
                 }
             }
             return false;
-        }
-
-        public static bool IsCheckmate(this ChessPosition position)
-        {
-            
         }
     }
 }
