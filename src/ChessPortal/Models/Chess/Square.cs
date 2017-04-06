@@ -21,8 +21,8 @@ namespace ChessPortal.Models.Chess
     [Flags]
     public enum Color
     {
-        Black,
-        White
+        White,
+        Black
     }
 
     public class Square

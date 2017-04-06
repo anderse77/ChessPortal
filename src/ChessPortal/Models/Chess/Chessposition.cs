@@ -73,7 +73,7 @@ namespace ChessPortal.Models.Chess
 
         public bool WhiteToMove { get; set; }
 
-        public ChessPosition UpdateBoard(Move move)
+        public ChessPosition UpdateBoardIfValid(Move move)
         {
             var newBoard = new Square[BoardCharacteristics.SideLength, BoardCharacteristics.SideLength];
             for (int i = 0; i < newBoard.GetLength(1); i++)
@@ -86,16 +86,22 @@ namespace ChessPortal.Models.Chess
                     }
                     else if (j == move.ToX && i == move.ToY)
                     {
-                        newBoard[j, i] = new Square(move.Piece, move.Color);
+                        newBoard[j, i] = move.Piece == Piece.Pawn &&
+                                         (move.Color == Color.White ? move.ToY == 7 : move.ToY == 0)
+                            ? new Square(move.PromoteTo ?? Piece.Queen, move.Color)
+                            : new Square(move.Piece, move.Color);
                     }
                     else if (move.IsEnPassant && j == move.FromX + move.Direction.GetModifiers()[0] &&
                              i == move.FromY)
                     {
                         newBoard[j, i] = new Square();
                     }
-                    else if (move.IsCastle)
+                    else if (move.IsCastle &&
+                             ((j == (move.Direction == Direction.East ? (move.ToX == 6 ? 7 : 0) : (move.ToX == 2 ? 0 : 7)) &&
+                              i == (move.Color == Color.White ? 0 : 7)) ||
+                             (j == (move.Direction == Direction.East ? move.ToX - 1 : move.ToX + 1) && i == move.ToY)))
                     {
-                        if (j == (move.Color == Color.White ? (move.ToX == 6 ? 7 : 0) : (move.ToX == 2 ? 0 : 7)) &&
+                        if (j == (move.Direction == Direction.East ? (move.ToX == 6 ? 7 : 0) : (move.ToX == 2 ? 0 : 7)) &&
                             i == (move.Color == Color.White ? 0 : 7))
                         {
                             newBoard[j, i] = new Square();
@@ -113,8 +119,10 @@ namespace ChessPortal.Models.Chess
                 }
             }
             var newPostion = new ChessPosition(newBoard, move.Color == Color.Black);
-            return newPostion.OwnKingIsLeftInCheck() ? this : newPostion;
+            return newPostion.KingIsInCheck(move.Color) ? this : newPostion;
         }
+
+
 
         IEnumerator IEnumerable.GetEnumerator()
         {
@@ -132,20 +140,20 @@ namespace ChessPortal.Models.Chess
             }
         }
 
-        public int[] GetOwnKingLocation()
+        public int[] GetKingPosition(Color color)
         {
             for (int i = 0; i < _board.GetLength(1); i++)
             {
                 for (int j = 0; j < _board.GetLength(0); j++)
                 {
                     var square = _board[j, i];
-                    if (square.Piece == Piece.King && square.Color == (WhiteToMove ? Color.White : Color.Black))
+                    if (square.Piece == Piece.King && square.Color == color)
                     {
                         return new[] {j, i};
                     }
                 }
             }
-            throw new Exception("Own king not on board");
+            throw new Exception("King is not on board");
         }
     }
 }

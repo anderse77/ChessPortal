@@ -35,6 +35,7 @@ namespace ChessPortal.Models.Chess
         public int FromY { get; }
         public int ToY { get; }
         public Color Color { get; }
+        public Piece? PromoteTo { get; set; }
 
         public Direction Direction
         {
@@ -183,7 +184,7 @@ namespace ChessPortal.Models.Chess
 
         public bool IsEnPassant { get; set; }
 
-        public Move(Piece piece, int fromX, int toX, int fromY, int toY, Color color)
+        public Move(Piece piece, int fromX, int toX, int fromY, int toY, Color color, Piece? promoteTo)
         {
             Piece = piece;
             FromX = fromX;
@@ -191,6 +192,7 @@ namespace ChessPortal.Models.Chess
             FromY = fromY;
             ToY = toY;
             Color = color;
+            PromoteTo = promoteTo;
         }
 
         public override bool Equals(object obj)
@@ -200,12 +202,12 @@ namespace ChessPortal.Models.Chess
             {
                 return false;
             }
-            return FromX == move.FromX && FromY == move.FromY && ToX == move.ToX && ToY == move.ToY;
+            return Piece == move.Piece && Color == move.Color && FromX == move.FromX && FromY == move.FromY && ToX == move.ToX && ToY == move.ToY;
         }
 
         public override int GetHashCode()
         {
-            return FromX.GetHashCode() ^ FromY.GetHashCode() ^ ToX.GetHashCode() ^ ToY.GetHashCode();
+            return Piece.GetHashCode() ^ Color.GetHashCode() ^ FromX.GetHashCode() ^ FromY.GetHashCode() ^ ToX.GetHashCode() ^ ToY.GetHashCode();
         }
 
         public static bool operator ==(Move lhs, Move rhs)
@@ -220,7 +222,7 @@ namespace ChessPortal.Models.Chess
                 return false;
             }
 
-            return lhs.FromX == rhs.FromX && lhs.FromY == rhs.FromY && lhs.ToX == rhs.ToX && lhs.ToY == rhs.ToY;
+            return lhs.Piece == rhs.Piece && lhs.Color == rhs.Color && lhs.FromX == rhs.FromX && lhs.FromY == rhs.FromY && lhs.ToX == rhs.ToX && lhs.ToY == rhs.ToY;
         }
 
         public static bool operator !=(Move lhs, Move rhs)

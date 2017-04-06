@@ -53,7 +53,7 @@ namespace ChessPortal.Models.Chess
                 {
                     return false;
                 }
-                if (position.PathBetweenKingAndRookIsFreeForCastling(move))
+                if (!position.PathBetweenKingAndRookIsFreeForCastling(move))
                 {
                     return false;
                 }
@@ -92,7 +92,7 @@ namespace ChessPortal.Models.Chess
             var numberOfSquaresToSearch = move.Direction == Direction.East ? 2 : 3;
             var searchInfo = position.GetNearestOccupiedSquare(move.FromX, move.FromY, move.Direction,
                 numberOfSquaresToSearch);
-            return searchInfo.NumberOfSquaresAway != numberOfSquaresToSearch;
+            return searchInfo.Square.Piece == null;
         }
 
         static bool KingIsInCheckAfterCastlingOrKingDoesPassesOverASquareControlledByOpponent(
@@ -102,14 +102,14 @@ namespace ChessPortal.Models.Chess
             for (int i = 1; i <= 2; i++)
             {
                 var newPosition =
-                    position.UpdateBoard(new Move(Piece.King, move.FromX, move.FromX + i * increment, move.FromY,
-                        move.ToY, move.Color));
-                if (newPosition.OwnKingIsLeftInCheck())
+                    position.UpdateBoardIfValid(new Move(Piece.King, move.FromX, move.FromX + i * increment, move.FromY,
+                        move.ToY, move.Color, null));
+                if (newPosition.KingIsInCheck(move.Color))
                 {
-                    return false;
+                    return true;
                 }
             }
-            return true;
+            return false;
         }
 
         public static int[] GetModifiers(this Direction direction)
@@ -153,63 +153,54 @@ namespace ChessPortal.Models.Chess
             }
         }
 
-        public static bool OwnKingIsLeftInCheck(this ChessPosition position)
+        public static bool KingIsInCheck(this ChessPosition position, Color color)
         {
-            var ownColor = position.WhiteToMove ? Color.White : Color.Black;
-            var ownKingPosition = position.GetOwnKingLocation();
+            var ownKingPosition = position.GetKingPosition(color);
             foreach (Direction direction in Enum.GetValues(typeof(Direction)))
             {
-                int numberOfSquaresToNearestEdge = GetNumberOfSquaresToNearestEdge(ownKingPosition, direction);
-                var nearestOccupiedSquareInfo = position.GetNearestOccupiedSquare(ownKingPosition[0], ownKingPosition[1],
-                    direction,
-                    RuleInfo.ValidDirections[Piece.Knight].Contains(direction) ? 1 : numberOfSquaresToNearestEdge);
-                if (nearestOccupiedSquareInfo.Square.Piece.HasValue)
+                if (direction != Direction.Other)
                 {
-                    if (nearestOccupiedSquareInfo.Square.Piece == Piece.Pawn && nearestOccupiedSquareInfo.NumberOfSquaresAway == 1)
+                    int numberOfSquaresToNearestEdge = GetNumberOfSquaresToNearestEdge(ownKingPosition, direction);
+                    var nearestOccupiedSquareInfo = position.GetNearestOccupiedSquare(ownKingPosition[0], ownKingPosition[1],
+                        direction,
+                        RuleInfo.ValidDirections[Piece.Knight].Contains(direction) && numberOfSquaresToNearestEdge > 0 ? 1 : numberOfSquaresToNearestEdge);
+                    if (nearestOccupiedSquareInfo.Square.Piece.HasValue &&
+                        (nearestOccupiedSquareInfo.Square.Piece.Value != Piece.King ||
+                         nearestOccupiedSquareInfo.NumberOfSquaresAway != 1))
                     {
-                        if (ownColor == Color.White && nearestOccupiedSquareInfo.Square.Color == Color.Black)
+                        if (nearestOccupiedSquareInfo.Square.Piece == Piece.Pawn && nearestOccupiedSquareInfo.NumberOfSquaresAway == 1)
                         {
-                            if (direction == Direction.Northeast || direction == Direction.Northwest)
+                            if (color == Color.White && nearestOccupiedSquareInfo.Square.Color == Color.Black)
                             {
-                                return true;
+                                if (direction == Direction.Northeast || direction == Direction.Northwest)
+                                {
+                                    return true;
+                                }
+                            }
+                            else if (color == Color.Black && nearestOccupiedSquareInfo.Square.Color == Color.White)
+                            {
+                                if (direction == Direction.Southeast || direction == Direction.Southwest)
+                                {
+                                    return true;
+                                }
                             }
                         }
-                        else if (ownColor == Color.Black && nearestOccupiedSquareInfo.Square.Color == Color.White)
+                        else if (nearestOccupiedSquareInfo.Square.Piece != Piece.Pawn)
                         {
-                            if (direction == Direction.Southeast || direction == Direction.Southwest)
+                            if (nearestOccupiedSquareInfo.Square.Color != color &&
+                                RuleInfo.ValidDirections.Keys.Any(k => k == nearestOccupiedSquareInfo.Square.Piece.Value && RuleInfo.ValidDirections[k].Contains(direction)))
                             {
                                 return true;
                             }
                         }
                     }
-                    else if (nearestOccupiedSquareInfo.Square.Piece != Piece.Pawn)
-                    {
-                        if (nearestOccupiedSquareInfo.Square.Color != ownColor &&
-                            RuleInfo.ValidDirections.Keys.Where(k => RuleInfo.ValidDirections[k].Contains(direction))
-                                .Contains(nearestOccupiedSquareInfo.Square.Piece.Value))
-                        {
-                            return true;
-                        }
-                    }
-                }                
+                }
+                
             }
             return false;
         }
 
-        static int GetNumberOfSquaresToNearestEdge(int[] coordinates, Direction direction)
-        {
-            var numberOfSquaresToNearestEdge = 0;
-            var modifiers = direction.GetModifiers();
-            int[] newCoordinates = {coordinates[0] + modifiers[0], coordinates[1] + modifiers[1]};
-            while (newCoordinates.All(i => i > 0 &&  i < 7))
-            {
-                numberOfSquaresToNearestEdge++;
-                newCoordinates = new[] {newCoordinates[0] + modifiers[0], newCoordinates[1] + modifiers[1]};
-            }
-            return numberOfSquaresToNearestEdge;
-        }
-
-        static PieceSearchInfo GetNearestOccupiedSquare(this ChessPosition position, int fromX, int fromY, Direction direction, int numberOfSquaresToSearch)
+        public static PieceSearchInfo GetNearestOccupiedSquare(this ChessPosition position, int fromX, int fromY, Direction direction, int numberOfSquaresToSearch)
         {
             var modifiers = GetModifiers(direction);
             var x = fromX;
@@ -226,6 +217,19 @@ namespace ChessPortal.Models.Chess
             }
             return new PieceSearchInfo(new Square(), numberOfSquaresToSearch);
         }
+
+        static int GetNumberOfSquaresToNearestEdge(int[] coordinates, Direction direction)
+        {
+            var numberOfSquaresToNearestEdge = 0;
+            var modifiers = direction.GetModifiers();
+            int[] newCoordinates = {coordinates[0] + modifiers[0], coordinates[1] + modifiers[1]};
+            while (newCoordinates.All(i => i > -1 &&  i < 8))
+            {
+                numberOfSquaresToNearestEdge++;
+                newCoordinates = new[] {newCoordinates[0] + modifiers[0], newCoordinates[1] + modifiers[1]};
+            }
+            return numberOfSquaresToNearestEdge;
+        }       
 
         static Direction[] GetValidPawnCaptureDirections(Color pawnColor)
         {

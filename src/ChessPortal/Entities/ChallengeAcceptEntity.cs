@@ -11,13 +11,12 @@ namespace ChessPortal.Entities
     public class ChallengeAcceptEntity
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         [ForeignKey("PlayerId")]
         public ChessPlayer AcceptingPlayer { get; set; }
         [ForeignKey("ChallengeId")]
         public ChallengeEntity Challenge { get; set; }
         public string PlayerId { get; set; }
-        public int ChallangeId { get; set; }
+        public Guid ChallengeId { get; set; }
     }
 }

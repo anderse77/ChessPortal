@@ -2,7 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ChessPortal.DataInterfaces;
+using ChessPortal.DtoProviders;
 using ChessPortal.Entities;
+using ChessPortal.Handlers;
+using ChessPortal.Models.Dtos;
+using ChessPortal.Models.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -48,6 +53,9 @@ namespace ChessPortal
                 .AddEntityFrameworkStores<ChessPortalContext>()
                 .AddDefaultTokenProviders();
 
+            services.AddScoped<IChessPortalRepository, ChessPortalRepository>();
+            services.AddScoped<IChallengeHandler, ChallengeHandler>();
+            services.AddScoped<IChallengeDtoProvider, ChallengeDtoProvider>();
             //services.AddAuthorization(options =>
             //{
             //    options.AddPolicy("CityVisited", policy => policy.Requirements.Add(new CityVisitedRequirement()));
@@ -79,7 +87,10 @@ namespace ChessPortal
 
             AutoMapper.Mapper.Initialize(cfg =>
             {
-                
+                cfg.CreateMap<ChallengeDto, ChallengeEntity>();
+                cfg.CreateMap<ChallengeEntity, ChallengeDto>();
+                cfg.CreateMap<MoveDto, MoveEntity>();
+                cfg.CreateMap<MoveEntity, MoveDto>();
             });
 
             app.UseIdentity();
