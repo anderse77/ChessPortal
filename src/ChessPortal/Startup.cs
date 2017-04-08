@@ -91,6 +91,8 @@ namespace ChessPortal
                 cfg.CreateMap<ChallengeEntity, ChallengeDto>();
                 cfg.CreateMap<MoveDto, MoveEntity>();
                 cfg.CreateMap<MoveEntity, MoveDto>();
+                cfg.CreateMap<DrawRequestDto, DrawRequestEntity>();
+                cfg.CreateMap<DrawRequestEntity, DrawRequestDto>();
             });
 
             app.UseIdentity();

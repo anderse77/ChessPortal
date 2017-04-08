@@ -16,5 +16,6 @@ namespace ChessPortal.Models.Dtos
         [Required(ErrorMessage = "TimePerMove is required")]
         public int DaysPerMove { get; set; }
         public List<MoveDto> Moves { get; set; } = new List<MoveDto>();
+        public List<DrawRequestDto> DrawRequests = new List<DrawRequestDto>();
     }
 }

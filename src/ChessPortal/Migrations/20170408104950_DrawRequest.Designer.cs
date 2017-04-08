@@ -8,9 +8,10 @@ using ChessPortal.Entities;
 namespace ChessPortal.Migrations
 {
     [DbContext(typeof(ChessPortalContext))]
-    partial class ChessPortalContextModelSnapshot : ModelSnapshot
+    [Migration("20170408104950_DrawRequest")]
+    partial class DrawRequest
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.0-rtm-22752")

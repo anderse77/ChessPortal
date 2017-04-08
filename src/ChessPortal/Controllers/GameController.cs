@@ -118,7 +118,7 @@ namespace ChessPortal.Controllers
 
             var playerId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            switch (await Task.Run(() => _challengeHandler.Validate(move, move.ChallengeId, playerId)))
+            switch (await Task.Run(() => _challengeHandler.ValidateMove(move, move.ChallengeId, playerId)))
             {
                 case ValidationResult.BlackLostOnTime:
                     if (!await _challengeHandler.UpdateStats(Color.White, move.ChallengeId))
@@ -147,27 +147,19 @@ namespace ChessPortal.Controllers
                 case ValidationResult.Failed:
                     return BadRequest("This is not a valid move");
                 case ValidationResult.Success:
-                    if (!_challengeHandler.UpdateGame(move))
+                    if (!_challengeHandler.DeleteDrawRequestIfItExistsAndIsMadeByOtherPlayer(move.ChallengeId, playerId) || !_challengeHandler.UpdateGame(move))
                     {
                         return StatusCode(500, "A problem happened while handling your request.");
                     }
                     break;
                 case ValidationResult.WhiteWon:
-                    if (!_challengeHandler.UpdateGame(move))
-                    {
-                        return StatusCode(500, "A problem happened while handling your request.");
-                    }
-                    if (!await _challengeHandler.UpdateStats(Color.White, move.ChallengeId))
+                    if (!_challengeHandler.UpdateGame(move) || !await _challengeHandler.UpdateStats(Color.White, move.ChallengeId))
                     {
                         return StatusCode(500, "A problem happened while handling your request.");
                     }
                     return Ok("You won!");
                 case ValidationResult.BlackWon:
-                    if (!_challengeHandler.UpdateGame(move))
-                    {
-                        return StatusCode(500, "A problem happened while handling your request.");
-                    }
-                    if (!await _challengeHandler.UpdateStats(Color.Black, move.ChallengeId))
+                    if (!_challengeHandler.UpdateGame(move) || !await _challengeHandler.UpdateStats(Color.Black, move.ChallengeId))
                     {
                         return StatusCode(500, "A problem happened while handling your request.");
                     }
@@ -176,5 +168,69 @@ namespace ChessPortal.Controllers
             }
             return Ok("Moved");
         }
-    }
+
+        [HttpPost("draw/request")]
+        [Authorize]
+        public IActionResult RequestDraw([FromBody] DrawRequestDto drawRequest)
+        {
+            if (!_challengeHandler.ChallengeExists(drawRequest.ChallengeId))
+            {
+                return NotFound("Game does not exist");
+            }
+
+            if (_challengeHandler.DrawRequestExists(drawRequest.ChallengeId))
+            {
+                return BadRequest("You cannot create a second draw request for the same challenge");
+            }
+
+            drawRequest.PlayerId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            switch (_challengeHandler.ValidateDrawRequest(drawRequest.ChallengeId, drawRequest.PlayerId))
+            {
+                case ValidationResult.Failed:
+                    return BadRequest("You can only request a move in an ongoing game");
+                    case ValidationResult.WrongPlayer:
+                    return BadRequest("You must be playing the game in which you request a draw");
+                    case ValidationResult.Success:
+                    if (!_challengeHandler.MakeDrawRequest(drawRequest))
+                    {
+                        return StatusCode(500, "A problem happened while handling your request.");
+                    }
+                    break;
+            }
+            return Ok("Draw request made");
+        }
+
+        [HttpPost("draw/accept")]
+        [Authorize]
+        public async Task<IActionResult> AcceptDraw([FromBody] DrawAcceptDto drawAcceptDto)
+        {
+            if (!_challengeHandler.ChallengeExists(drawAcceptDto.ChallengeId))
+            {
+                return NotFound("Game does not exist");
+            }
+
+            if (!_challengeHandler.DrawRequestExists(drawAcceptDto.ChallengeId))
+            {
+                return NotFound("No draw request has been made for this game");
+            }
+
+            var playerId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            switch (_challengeHandler.ValidateDrawAccept(drawAcceptDto.ChallengeId, playerId))
+            {
+                case ValidationResult.WrongPlayer:
+                    return BadRequest("You cannot accept a draw request in a game you are not playing");
+                    case ValidationResult.Failed:
+                    return BadRequest("You cannot accept your own draw request");
+                    case ValidationResult.Success:
+                    if (!await _challengeHandler.UpdateStats(null, drawAcceptDto.ChallengeId))
+                    {
+                        return StatusCode(500, "A problem happened while handling your request.");
+                    }
+                    break;
+            }
+            return Ok("Draw has been accepted");
+        }
+    }   
 }

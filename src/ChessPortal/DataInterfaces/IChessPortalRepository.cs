@@ -22,6 +22,10 @@ namespace ChessPortal.DataInterfaces
         ChallengeEntity GetChallenge(Guid challengeId);
         ChessPlayer GetPlayerForChallenge(Guid challengeId, Color color);
         void AddMove(MoveEntity move);
+        void AddDrawRequest(DrawRequestEntity drawRequest);
+        bool DrawRequestIsMadeByPlayer(Guid challengeId, string playerId);
+        bool DrawRequestExists(Guid challengeId);
+        void DeleteDrawRequest(Guid challengeId);
         Task<bool> UpdateUser(ChessPlayer user);
         bool Save();
     }

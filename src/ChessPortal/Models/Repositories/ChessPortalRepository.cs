@@ -65,11 +65,11 @@ namespace ChessPortal.Models.Repositories
 
         public IEnumerable<ChallengeEntity> GetAcceptedChallengesForPlayer(string playerId)
         {
-            return _context.Challenges.Include(c => c.Moves)
-                    .Where(
-                        c =>
-                            c.PlayerId == playerId ||
-                            _context.AcceptedChallenges.FirstOrDefault(ac => ac.PlayerId == playerId) != null).ToList();
+            return _context.Challenges.Include(c => c.Moves).Include(c => c.DrawRequests)
+                .Where(
+                    c =>
+                        c.PlayerId == playerId ||
+                        _context.AcceptedChallenges.FirstOrDefault(ac => ac.PlayerId == playerId) != null).ToList();
         }
 
         public bool ChallengeIsCreatedOrAcceptedByPlayer(Guid challengeId, string playerId)
@@ -101,6 +101,26 @@ namespace ChessPortal.Models.Repositories
             move.MoveNumber = GetNextMoveNumber(challenge);
             move.MoveDate = DateTime.Now;
             _context.Add(move);
+        }
+
+        public void AddDrawRequest(DrawRequestEntity drawRequest)
+        {
+            _context.Add(drawRequest);
+        }
+
+        public bool DrawRequestIsMadeByPlayer(Guid challengeId, string playerId)
+        {
+            return _context.DrawRequests.Any(d => d.ChallengeId == challengeId && d.PlayerId == playerId);
+        }
+
+        public bool DrawRequestExists(Guid challengeId)
+        {
+            return _context.DrawRequests.Any(d => d.ChallengeId == challengeId);
+        }
+
+        public void DeleteDrawRequest(Guid challengeId)
+        {
+            _context.DrawRequests.Remove(_context.DrawRequests.FirstOrDefault(d => d.ChallengeId == challengeId));
         }
 
         public async Task<bool> UpdateUser(ChessPlayer user)

@@ -19,6 +19,11 @@ namespace ChessPortal.DataInterfaces
         bool AcceptChallenge(Guid challengeId, string playerId);
         Task<bool> UpdateStats(Color? winningColor, Guid challengeId);
         bool UpdateGame(MoveDto move);
-        ValidationResult Validate(MoveDto moveDto, Guid challengeId, string playerId);
+        ValidationResult ValidateMove(MoveDto moveDto, Guid challengeId, string playerId);
+        ValidationResult ValidateDrawRequest(Guid challengeId, string playerId);
+        ValidationResult ValidateDrawAccept(Guid challengeId, string playerId);
+        bool MakeDrawRequest(DrawRequestDto drawRequestDto);
+        bool DrawRequestExists(Guid challengeId);
+        bool DeleteDrawRequestIfItExistsAndIsMadeByOtherPlayer(Guid challengeId, string playerId);
     }
 }

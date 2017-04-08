@@ -67,7 +67,7 @@ namespace ChessPortal.Handlers
             return _chessPortalRepository.Save();
         }
 
-        public ValidationResult Validate(MoveDto moveDto, Guid challengeId, string playerId)
+        public ValidationResult ValidateMove(MoveDto moveDto, Guid challengeId, string playerId)
         {
             var challenge = _chessPortalRepository.GetChallenge(challengeId);
             if (!ChallengeIsCreatedOrAcceptedByPlayer(challengeId, playerId))
@@ -90,10 +90,11 @@ namespace ChessPortal.Handlers
             {
                 return ValidationResult.InvalidPromotion;
             }
-            if (MoveIsPawnPromotion(moveDto) && !moveDto.PromoteTo.HasValue)
+            if (MoveIsPawnPromotion(moveDto) && (!moveDto.PromoteTo.HasValue || moveDto.PromoteTo.Value == Piece.Pawn))
             {
                 return ValidationResult.NotEnoughPromotionInformation;
             }
+
             if (GameExpired(challenge))
             {
                 var playerIsWhite = PlayerIsWhite(challenge, playerId);
@@ -141,6 +142,7 @@ namespace ChessPortal.Handlers
                 var player2 = _chessPortalRepository.GetPlayerForChallenge(challengeId, Color.Black);
                 player1.NumberOfDrawnGames += 1;
                 player2.NumberOfDrawnGames += 1;
+                challenge.Status = GameStatus.Draw;
                 if (!await _chessPortalRepository.UpdateUser(player1) ||
                     !await _chessPortalRepository.UpdateUser(player2))
                 {
@@ -155,6 +157,75 @@ namespace ChessPortal.Handlers
         {
             _chessPortalRepository.AddMove(Mapper.Map<MoveEntity>(move));
             return _chessPortalRepository.Save();
+        }
+
+        public ValidationResult ValidateDrawRequest(Guid challengeId, string playerId)
+        {
+            var challenge = _chessPortalRepository.GetChallenge(challengeId);
+            if (challenge.Status != GameStatus.Ongoing)
+            {
+                return ValidationResult.Failed;
+            }
+
+            if (!ChallengeIsCreatedOrAcceptedByPlayer(challengeId, playerId))
+            {
+                return ValidationResult.WrongPlayer;
+            }
+
+            return ValidationResult.Success;
+        }
+
+        public ValidationResult ValidateDrawAccept(Guid challengeId, string playerId)
+        {
+            if (!ChallengeIsCreatedOrAcceptedByPlayer(challengeId, playerId))
+            {
+                return ValidationResult.WrongPlayer;
+            }
+
+            if (DrawRequestIsMadeByPlayer(challengeId, playerId))
+            {
+                return ValidationResult.Failed;
+            }
+
+            return ValidationResult.Success;
+        }
+
+        public bool MakeDrawRequest(DrawRequestDto drawRequestDto)
+        {
+            _chessPortalRepository.AddDrawRequest(Mapper.Map<DrawRequestEntity>(drawRequestDto));
+            return _chessPortalRepository.Save();
+        }
+
+        public bool AcceptDrawRequest(Guid challengeId)
+        {
+            var challenge = _chessPortalRepository.GetChallenge(challengeId);
+            challenge.Status = GameStatus.Draw;
+            return _chessPortalRepository.Save();
+        }
+
+        public bool DrawRequestExists(Guid challengeId)
+        {
+            return _chessPortalRepository.DrawRequestExists(challengeId);
+        }
+
+        public bool DeleteDrawRequestIfItExistsAndIsMadeByOtherPlayer(Guid challengeId, string playerId)
+        {
+            if (DrawRequestExists(challengeId) && !DrawRequestIsMadeByPlayer(challengeId, playerId))
+            {
+                _chessPortalRepository.DeleteDrawRequest(challengeId);
+                return _chessPortalRepository.Save();
+            }
+            return true;
+        }
+
+        bool DrawRequestIsMadeByPlayer(Guid challengeId, string playerId)
+        {
+            return _chessPortalRepository.DrawRequestIsMadeByPlayer(challengeId, playerId);
+        }
+
+        bool ChallengeIsCreatedOrAcceptedByPlayer(Guid challengeId, string playerId)
+        {
+            return _chessPortalRepository.ChallengeIsCreatedOrAcceptedByPlayer(challengeId, playerId);
         }
 
         bool MoveIsPawnPromotion(MoveDto move)
@@ -182,11 +253,6 @@ namespace ChessPortal.Handlers
             return (challenge.Color == Color.White &&
                     challenge.PlayerId == playerId) ||
                    challenge.Color == Color.Black;
-        }
-
-        bool ChallengeIsCreatedOrAcceptedByPlayer(Guid challengeId, string playerId)
-        {
-            return _chessPortalRepository.ChallengeIsCreatedOrAcceptedByPlayer(challengeId, playerId);
         }
 
         bool PlayerHasTheMove(ChallengeEntity challenge, string playerId)

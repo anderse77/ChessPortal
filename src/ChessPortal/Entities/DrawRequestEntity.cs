@@ -5,21 +5,18 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ChessPortal.Models.Chess;
 
 namespace ChessPortal.Entities
 {
-    public class ChallengeEntity
+    public class DrawRequestEntity
     {
         [Key]
         public Guid Id { get; set; }
-        public Color Color { get; set; }
-        public int DaysPerMove { get; set; }
-        public GameStatus Status { get; set; }
         [ForeignKey("PlayerId")]
         public ChessPlayer Player { get; set; }
         public string PlayerId { get; set; }
-        public List<MoveEntity> Moves { get; set; } = new List<MoveEntity>();
-        public List<DrawRequestEntity> DrawRequests { get; set; } = new List<DrawRequestEntity>();
+        [ForeignKey("ChallengeId")]
+        public ChallengeEntity Challenge { get; set; }
+        public Guid ChallengeId { get; set; }
     }
 }
