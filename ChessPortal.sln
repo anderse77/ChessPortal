@@ -1,16 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D759DA81-F4D7-494F-B44F-478D7FD0BF82}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F6C14B05-1BB1-49FF-9661-6785283D2B99}"
-	ProjectSection(SolutionItems) = preProject
-		global.json = global.json
-	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ChessPortal", "src\ChessPortal\ChessPortal.xproj", "{5C6CEC5D-EC99-4819-BFE5-40EA8F390886}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessPortal", "src\ChessPortal\ChessPortal.csproj", "{5C6CEC5D-EC99-4819-BFE5-40EA8F390886}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
