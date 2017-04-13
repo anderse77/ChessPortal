@@ -123,6 +123,11 @@ namespace ChessPortal.Models.Repositories
             _context.DrawRequests.Remove(_context.DrawRequests.FirstOrDefault(d => d.ChallengeId == challengeId));
         }
 
+        public ChessProblemEntity GetChessProblemForPlayer(string playerId)
+        {
+            return _context.ChessProblems.SingleOrDefault(p => p.PlayerId == playerId);
+        }
+
         public async Task<bool> UpdateUser(ChessPlayer user)
         {
             var store = new UserStore<ChessPlayer>(_context);

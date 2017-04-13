@@ -45,7 +45,7 @@ namespace ChessPortal
                .AddMvcOptions(o =>
                    o.OutputFormatters.Add(
                        new XmlDataContractSerializerOutputFormatter()));
-            var connectionString = Startup.Configuration["connectionStrings:ChessPortalDBConnectionString"];
+            var connectionString = Startup.Configuration["ConnectionStrings:ChessPortalDBConnectionString"];
             services.AddDbContext<ChessPortalContext>(o => o.UseSqlServer(connectionString));
             //services.AddScoped<ICityInfoRepoistory, CityInfoRepository>();
 

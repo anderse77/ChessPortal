@@ -40,6 +40,42 @@ namespace ChessPortal.Models.Chess
         {
         }
 
+        public static Square FromFenChar (char fen)
+        {
+            var color = fen.ToString().ToUpper() == fen.ToString() ? Chess.Color.White : Chess.Color.Black;
+            foreach (Piece piece in Enum.GetValues(typeof(Piece)))
+            {
+                if (fen.ToString().ToLower() == "n")
+                {
+                    return new Square(Chess.Piece.Knight, color);
+                }
+                if (piece.ToString().ToLower().First() == fen.ToString().ToLower().First())
+                {
+                    
+                    return new Square(piece, color);
+                }
+            }
+            throw new ArgumentException("This is not a valid fen char");
+        }
+
+        public char ToFenChar()
+        {
+            if (!Piece.HasValue || !Color.HasValue)
+            {
+                throw new ArgumentException("This square cannot be converted to a fen char");
+            }
+            char algebraicNotationCharacter;
+            if (Piece.Value == Chess.Piece.Knight)
+            {
+                algebraicNotationCharacter = 'N';
+            }
+            else
+            {
+                algebraicNotationCharacter = Piece.ToString().First();
+            }            
+            return Color.Value == Chess.Color.White ? char.ToUpper(algebraicNotationCharacter) : char.ToLower(algebraicNotationCharacter);
+        }
+
         public override bool Equals(object obj)
         {
             if (obj == null)

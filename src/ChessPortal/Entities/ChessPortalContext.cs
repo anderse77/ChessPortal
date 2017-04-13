@@ -20,5 +20,6 @@ namespace ChessPortal.Entities
         public DbSet<ChallengeAcceptEntity> AcceptedChallenges { get; set; }
         public DbSet<MoveEntity> Moves { get; set; }
         public DbSet<DrawRequestEntity> DrawRequests { get; set; }
+        public DbSet<ChessProblemEntity> ChessProblems { get; set; }
     }
 }

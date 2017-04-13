@@ -122,7 +122,74 @@ namespace ChessPortal.Models.Chess
             return newPostion.KingIsInCheck(move.Color) ? this : newPostion;
         }
 
+        public static ChessPosition FromFen(string fen)
+        {
+            var parts = fen.Split(' ');
+            if(parts.Length >= 2)
+            {
+                throw new ArgumentException("This is not a valid fen-string");
+            }
+            var ranks = parts[0].Split('/');
+            if (ranks.Length != BoardCharacteristics.SideLength)
+            {
+                throw new ArgumentException("This is not a valid fen-string");
+            }
+            var board = new Square[BoardCharacteristics.SideLength, BoardCharacteristics.SideLength];
+            int xCounter = 0;
+            for (int i = 0; i < BoardCharacteristics.SideLength; i++)
+            {
+                var rank = ranks[i];
+                var yCounter = 7 - i;
+                for (int j = 0; j < rank.Length; j++)
+                {
+                    int number = 0;
+                    if (int.TryParse(rank[j].ToString(), out number))
+                    {
+                        for (int k = 0; k < number; k++)
+                        {
+                            board[xCounter, yCounter] = new Square();
+                            xCounter++;
+                        }
+                    }
+                    else
+                    {
+                        board[xCounter, yCounter] = Square.FromFenChar(rank[j]);
+                        xCounter++;
+                    }
+                }
+            }
+            return new ChessPosition(board, parts[1] == "w");
+        }
 
+        public string ToFenString()
+        {
+            var fen = new StringBuilder();
+            for (int j = 7; j > -1; j++)
+            {
+                for (int i = 0; i < BoardCharacteristics.SideLength; i++)
+                {
+                    var square = _board[i, j];
+                    if (square.Piece.HasValue)
+                    {
+                        fen.Append(square.ToFenChar());
+                    }
+                    else
+                    {
+                        int number = 0;
+                        while(!square.Piece.HasValue)
+                        {
+                            number++;
+                            i++;
+                            square = _board[i, j];
+                        }
+                        fen.Append(number.ToString());
+                    }
+                }
+                fen.Append("/");
+            }
+            fen.Append(WhiteToMove ? " w" : " b");
+            return fen.ToString();
+        }
 
         IEnumerator IEnumerable.GetEnumerator()
         {

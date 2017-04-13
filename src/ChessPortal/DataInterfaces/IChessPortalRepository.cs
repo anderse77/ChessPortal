@@ -26,6 +26,7 @@ namespace ChessPortal.DataInterfaces
         bool DrawRequestIsMadeByPlayer(Guid challengeId, string playerId);
         bool DrawRequestExists(Guid challengeId);
         void DeleteDrawRequest(Guid challengeId);
+        ChessProblemEntity GetChessProblemForPlayer(string playerId);
         Task<bool> UpdateUser(ChessPlayer user);
         bool Save();
     }

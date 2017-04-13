@@ -17,6 +17,19 @@ namespace ChessPortal.Models.Chess
         Ongoing
 
     }
+
+    public enum AlgebraicNotationLetters
+    {
+        a,
+        b,
+        c,
+        d,
+        e,
+        f,
+        g,
+        h
+    }
+
     public class ChessGame
     {
         public IList<ChessPosition> History { get; }
@@ -240,7 +253,7 @@ namespace ChessPortal.Models.Chess
             return false;
         }
 
-        bool UpdateGame(Move move)
+        public bool UpdateGame(Move move)
         {
             var oldPosition = History.Last();
             var newPosition = oldPosition.UpdateBoardIfValid(move);
@@ -266,6 +279,146 @@ namespace ChessPortal.Models.Chess
                 }
 
                 return true;
+            }
+            return false;
+        }
+
+        public bool UpdateGame(string move)
+        {
+            var position = History.Last();
+            int toX = 0;
+            int toY = 0;
+            var color = position.WhiteToMove ? Color.White : Color.Black;
+            //move is castle
+            if (move == "O-O" || move == "O-O-O")
+            {
+                var fromX = 4;
+                var fromY = position.WhiteToMove ? 0 : 7;
+                toX = move == "O-O" ? 6 : 2;
+                toY = fromY;
+                UpdateGame(new Move(Piece.King, fromX, toX, fromY, toY, color, null)
+                {
+                    IsCastle = true
+                });
+            }
+            bool isCapture = false;
+            //check if move is capture and remove corresponding character.
+            if (move.Any(c => c == 'x'))
+            {
+                isCapture = true;
+                move = move.Replace("x", "");
+            }
+            //remove any + sign indicating that the move is check
+            if (move.Any(c => c == '+'))
+            {
+                move = move.Replace("+", "");
+            }
+            try
+            {
+                toX = (int)Enum.Parse(typeof(AlgebraicNotationLetters), move[move.Length - 2].ToString());
+                toY = int.Parse(move[move.Length - 1].ToString());
+            }
+            catch
+            {
+                throw new ArgumentException("move is not in algebraic notation format");
+            }
+            //move is pawn capture
+            if (move.First().ToString().ToLower() == move.First().ToString())
+            {
+                Piece? promoteTo = null;
+                if (move.Any(c => c == '='))
+                {
+                    promoteTo = Square.FromFenChar(move.Last()).Piece;
+                    move = move.Substring(0, move.Length - 2);
+                }
+                int fromX = 0;
+                int fromY = 0;
+                var validMoveCandidates = GetValidMoveCandidates();
+                try
+                {
+                    fromX = (int)Enum.Parse(typeof(AlgebraicNotationLetters), move.First().ToString());
+                }
+                catch
+                {
+                    throw new ArgumentException("move is not in algebraic notation format");
+                }
+                for (int i = 0; i < BoardCharacteristics.SideLength; i++)
+                {
+                    var square = position[fromX, i];
+                    if (square.Color.HasValue && square.Color == color && square.Piece.HasValue && square.Piece.Value == Piece.Pawn)
+                    {
+                        fromY = i;
+                        var moveCandidate = new Move(Piece.Pawn, fromX, toX, fromY, toY, color, promoteTo)
+                        {
+                            IsCapture = isCapture
+                        };
+                        if (validMoveCandidates.Contains(moveCandidate))
+                        {
+                            return UpdateGame(moveCandidate);
+                        }
+                    }
+                }
+            }
+            var piece = Square.FromFenChar(move[0]).Piece.Value;            
+            if (move.Length == 4)
+            {
+                var rankOrFileIdentifier = move[1];
+                int number = 0;
+                if (int.TryParse(rankOrFileIdentifier.ToString(), out number))
+                {
+                    for (int i = 0; i < BoardCharacteristics.SideLength; i++)
+                    {
+                        var square = position[i, number - 1];
+                        if (square.Color.HasValue && square.Color == color && square.Piece.HasValue && square.Piece.Value == piece)
+                        {
+                            var moveCandidate = new Move(piece, i, toX, number - 1, toY, square.Color.Value, null)
+                            {
+                                IsCapture = isCapture
+                            };
+                            return UpdateGame(moveCandidate);
+                        }
+                    }
+                    return false;
+                }
+                else
+                {
+                    var fileNumber = (int)Enum.Parse(typeof(AlgebraicNotationLetters), rankOrFileIdentifier.ToString());
+                    for (int i = 0; i < BoardCharacteristics.SideLength; i++)
+                    {
+
+                        var square = position[fileNumber, i];
+                        if (square.Color.HasValue && square.Color == color && square.Piece.HasValue && square.Piece.Value == piece)
+                        {
+                            var moveCandidate = new Move(piece, fileNumber, toX, i, toY, square.Color.Value, null)
+                            {
+                                IsCapture = isCapture
+                            };
+                            return UpdateGame(moveCandidate);
+                        }
+                    }
+                }
+            }
+            else if (move.Length == 3)
+            {
+                for (int i = 0; i < BoardCharacteristics.SideLength; i++)
+                {
+                    for (int j = 0; j < BoardCharacteristics.SideLength; j++)
+                    {
+                        var square = position[j, i];
+                        if (square.Color.HasValue && square.Color == color && square.Piece.HasValue && square.Piece.Value == piece)
+                        {
+                            var moveCandidate = new Move(piece, j, toX, i, toY, color, null)
+                            {
+                                IsCapture = isCapture
+                            };
+                            var validMoveCandidates = GetValidMoveCandidates();
+                            if (validMoveCandidates.Contains(moveCandidate))
+                            {
+                                return UpdateGame(moveCandidate);
+                            }
+                        }
+                    }
+                }
             }
             return false;
         }
