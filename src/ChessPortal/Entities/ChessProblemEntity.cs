@@ -10,7 +10,7 @@ namespace ChessPortal.Entities
     public class ChessProblemEntity
     {
         [Key]
-        public Guid id { get; set; }
+        public Guid Id { get; set; }
         public string ChessProblemId { get; set; }
         public int moveOffsetNumber { get; set; }
         [ForeignKey("PlayerId")]

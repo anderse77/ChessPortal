@@ -125,7 +125,27 @@ namespace ChessPortal.Models.Repositories
 
         public ChessProblemEntity GetChessProblemForPlayer(string playerId)
         {
-            return _context.ChessProblems.SingleOrDefault(p => p.PlayerId == playerId);
+            return _context.ChessProblems.FirstOrDefault(p => p.PlayerId == playerId);
+        }
+
+        public void AddChessProblem(ChessProblemEntity chessProblem)
+        {
+            _context.ChessProblems.Add(chessProblem);
+        }
+
+        public void DeleteChessProblem (Guid id)
+        {
+            _context.ChessProblems.Remove(_context.ChessProblems.FirstOrDefault(d => d.Id == id));
+        }
+
+        public ChessPlayer GetPlayerById(string playerId)
+        {
+            return _context.Users.FirstOrDefault(u => u.Id == playerId);
+        }
+
+        public bool ChessProblemExistsForPlayer(string playerId)
+        {
+            return _context.ChessProblems.Any(p => p.PlayerId == playerId);
         }
 
         public async Task<bool> UpdateUser(ChessPlayer user)

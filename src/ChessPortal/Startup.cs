@@ -19,6 +19,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
+using ChessPortal.Settings;
+using ChessPortal.Services;
+using Newtonsoft.Json.Serialization;
 
 namespace ChessPortal
 {
@@ -42,26 +45,28 @@ namespace ChessPortal
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc()
-               .AddMvcOptions(o =>
+               .AddJsonOptions(o =>
+                       o.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver())
+                       .AddMvcOptions(o =>
                    o.OutputFormatters.Add(
                        new XmlDataContractSerializerOutputFormatter()));
             var connectionString = Startup.Configuration["ConnectionStrings:ChessPortalDBConnectionString"];
             services.AddDbContext<ChessPortalContext>(o => o.UseSqlServer(connectionString));
-            //services.AddScoped<ICityInfoRepoistory, CityInfoRepository>();
 
             services.AddIdentity<ChessPlayer, IdentityRole>(options => options.Cookies.ApplicationCookie.AutomaticChallenge = false)
                 .AddEntityFrameworkStores<ChessPortalContext>()
                 .AddDefaultTokenProviders();
 
+            services.AddOptions();
+
+            services.Configure<ChessProblemSettings>(Configuration.GetSection("ChessProblemSettings"));
+
             services.AddScoped<IChessPortalRepository, ChessPortalRepository>();
             services.AddScoped<IChallengeHandler, ChallengeHandler>();
             services.AddScoped<IChallengeDtoProvider, ChallengeDtoProvider>();
-            //services.AddAuthorization(options =>
-            //{
-            //    options.AddPolicy("CityVisited", policy => policy.Requirements.Add(new CityVisitedRequirement()));
-            //});
+            services.AddScoped<IChessProblemHandler, ChessProblemHandler>();
 
-            //services.AddSingleton<IAuthorizationHandler, CityVisitedHandler>();
+            services.AddSingleton<IChessProblemService, ChessProblemService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -34,7 +34,7 @@ namespace ChessPortal.Models.Chess
 
         public static bool PawnCanCaptureEnPassant(this Move move, ChessPosition position, IList<Move> moveList)
         {
-            if (RuleInfo.PawnCaptureDirections[move.Color].Contains(move.Direction))
+            if (moveList.Any() && RuleInfo.PawnCaptureDirections[move.Color].Contains(move.Direction))
             {
                 return LastMoveEnablesEnPassant(move, moveList[moveList.Count - 1]);
             }
@@ -164,9 +164,7 @@ namespace ChessPortal.Models.Chess
                     var nearestOccupiedSquareInfo = position.GetNearestOccupiedSquare(ownKingPosition[0], ownKingPosition[1],
                         direction,
                         RuleInfo.ValidDirections[Piece.Knight].Contains(direction) && numberOfSquaresToNearestEdge > 0 ? 1 : numberOfSquaresToNearestEdge);
-                    if (nearestOccupiedSquareInfo.Square.Piece.HasValue &&
-                        (nearestOccupiedSquareInfo.Square.Piece.Value != Piece.King ||
-                         nearestOccupiedSquareInfo.NumberOfSquaresAway != 1))
+                    if (nearestOccupiedSquareInfo.Square.Piece.HasValue)
                     {
                         if (nearestOccupiedSquareInfo.Square.Piece == Piece.Pawn && nearestOccupiedSquareInfo.NumberOfSquaresAway == 1)
                         {
@@ -188,6 +186,7 @@ namespace ChessPortal.Models.Chess
                         else if (nearestOccupiedSquareInfo.Square.Piece != Piece.Pawn)
                         {
                             if (nearestOccupiedSquareInfo.Square.Color != color &&
+                                RuleInfo.MaximumMoveLength[nearestOccupiedSquareInfo.Square.Piece.Value] >= nearestOccupiedSquareInfo.NumberOfSquaresAway &&
                                 RuleInfo.ValidDirections.Keys.Any(k => k == nearestOccupiedSquareInfo.Square.Piece.Value && RuleInfo.ValidDirections[k].Contains(direction)))
                             {
                                 return true;

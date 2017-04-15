@@ -17,6 +17,8 @@ namespace ChessPortal.Models.Chess
     {
         private Square[,] _board;
 
+        public string EnPassantCaptureLocationIfSetupFromFen { get; set; }
+
         public ChessPosition(Square[,] board, bool whiteToMove)
         {
             if (board.GetLength(0) != BoardCharacteristics.SideLength || board.GetLength(1) != BoardCharacteristics.SideLength)
@@ -125,7 +127,7 @@ namespace ChessPortal.Models.Chess
         public static ChessPosition FromFen(string fen)
         {
             var parts = fen.Split(' ');
-            if(parts.Length >= 2)
+            if (parts.Length < 2)
             {
                 throw new ArgumentException("This is not a valid fen-string");
             }
@@ -135,9 +137,9 @@ namespace ChessPortal.Models.Chess
                 throw new ArgumentException("This is not a valid fen-string");
             }
             var board = new Square[BoardCharacteristics.SideLength, BoardCharacteristics.SideLength];
-            int xCounter = 0;
             for (int i = 0; i < BoardCharacteristics.SideLength; i++)
             {
+                var xCounter = 0;
                 var rank = ranks[i];
                 var yCounter = 7 - i;
                 for (int j = 0; j < rank.Length; j++)
@@ -158,13 +160,16 @@ namespace ChessPortal.Models.Chess
                     }
                 }
             }
-            return new ChessPosition(board, parts[1] == "w");
+            return new ChessPosition(board, parts[1] == "w")
+            {
+                EnPassantCaptureLocationIfSetupFromFen = parts.Length >= 4 && parts[3] != "-" ? parts[3] : string.Empty
+            };
         }
 
         public string ToFenString()
         {
             var fen = new StringBuilder();
-            for (int j = 7; j > -1; j++)
+            for (int j = 7; j > -1; j--)
             {
                 for (int i = 0; i < BoardCharacteristics.SideLength; i++)
                 {
@@ -176,17 +181,26 @@ namespace ChessPortal.Models.Chess
                     else
                     {
                         int number = 0;
-                        while(!square.Piece.HasValue)
+                        while (i !=7 && !square.Piece.HasValue)
                         {
                             number++;
                             i++;
                             square = _board[i, j];
+                        }
+                        if (square.Piece.HasValue)
+                        {
+                            i--;
+                        }
+                        else
+                        {
+                            number++;
                         }
                         fen.Append(number.ToString());
                     }
                 }
                 fen.Append("/");
             }
+            fen.Remove(fen.Length - 1, 1);
             fen.Append(WhiteToMove ? " w" : " b");
             return fen.ToString();
         }
@@ -216,7 +230,7 @@ namespace ChessPortal.Models.Chess
                     var square = _board[j, i];
                     if (square.Piece == Piece.King && square.Color == color)
                     {
-                        return new[] {j, i};
+                        return new[] { j, i };
                     }
                 }
             }

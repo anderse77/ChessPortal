@@ -43,13 +43,13 @@ namespace ChessPortal.Models.Chess
         public static Square FromFenChar (char fen)
         {
             var color = fen.ToString().ToUpper() == fen.ToString() ? Chess.Color.White : Chess.Color.Black;
-            foreach (Piece piece in Enum.GetValues(typeof(Piece)))
+            if (fen.ToString().ToLower() == "n")
             {
-                if (fen.ToString().ToLower() == "n")
-                {
-                    return new Square(Chess.Piece.Knight, color);
-                }
-                if (piece.ToString().ToLower().First() == fen.ToString().ToLower().First())
+                return new Square(Chess.Piece.Knight, color);
+            }
+            foreach (Piece piece in Enum.GetValues(typeof(Piece)))
+            {                
+                if (piece != Chess.Piece.Knight && piece.ToString().ToLower().First() == fen.ToString().ToLower().First())
                 {
                     
                     return new Square(piece, color);

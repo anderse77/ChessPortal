@@ -9,9 +9,10 @@ using ChessPortal.Models.Chess;
 namespace ChessPortal.Migrations
 {
     [DbContext(typeof(ChessPortalContext))]
-    partial class ChessPortalContextModelSnapshot : ModelSnapshot
+    [Migration("20170413213334_ChessProblem")]
+    partial class ChessProblem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.1")
