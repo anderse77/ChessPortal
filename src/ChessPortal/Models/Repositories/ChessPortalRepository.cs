@@ -27,7 +27,7 @@ namespace ChessPortal.Models.Repositories
             _context.Challenges.Add(challenge);
         }
 
-        public IEnumerable<ChallengeEntity> GetChallenges(string playerId)
+        public IEnumerable<ChallengeEntity> GetChallengesThatPlayerCanAccept(string playerId)
         {
             return
                 _context.Challenges.Where(
@@ -68,8 +68,9 @@ namespace ChessPortal.Models.Repositories
             return _context.Challenges.Include(c => c.Moves).Include(c => c.DrawRequests)
                 .Where(
                     c =>
-                        c.PlayerId == playerId ||
-                        _context.AcceptedChallenges.FirstOrDefault(ac => ac.PlayerId == playerId) != null).ToList();
+                        (c.PlayerId == playerId  && 
+                        _context.AcceptedChallenges.Any(ac => ac.ChallengeId == c.Id)) ||
+                        _context.AcceptedChallenges.Any(ac => ac.ChallengeId == c.Id && ac.PlayerId == playerId)).ToList();
         }
 
         public bool ChallengeIsCreatedOrAcceptedByPlayer(Guid challengeId, string playerId)

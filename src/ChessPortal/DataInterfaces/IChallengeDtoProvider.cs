@@ -10,6 +10,5 @@ namespace ChessPortal.DataInterfaces
     public interface IChallengeDtoProvider
     {
         IEnumerable<ChallengeDto> GetChallengeDtos(string playerId);
-        IEnumerable<ChallengeDto> GetGames(string playerId);
     }
 }

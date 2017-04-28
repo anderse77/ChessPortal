@@ -80,7 +80,7 @@ namespace ChessPortal.Controllers
 
                 return BadRequest(errorMessage);
             }
-            _logger.LogWarning("Model state is invald");
+            _logger.LogWarning("Model state is invalid");
 
             return BadRequest(ModelState);
         }

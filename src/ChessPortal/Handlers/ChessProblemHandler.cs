@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 
 namespace ChessPortal.Handlers
 {
@@ -78,18 +79,15 @@ namespace ChessPortal.Handlers
                     Id = chessProblemEntity.ChessProblemId
                 });
             var game = GetUpdatedGame(chessProblemEntity, chessProblemResponse);
-            if (!game.MakeMove(new Move(move.Piece, move.FromX, move.ToX, move.FromY, move.ToY, move.Color, move.PromoteTo)))
-            {
-                return TryMoveResult.Failed;
-            }
+            game.MakeMove(new Move(move.Piece, move.FromX, move.ToX, move.FromY, move.ToY, move.Color, move.PromoteTo));
             var fenAfterMove = game.History.Last().ToFenString();
             game = GetUpdatedGame(chessProblemEntity, chessProblemResponse);
             game.UpdateGame(chessProblemResponse.Data.ForcedLine[chessProblemEntity.moveOffsetNumber]);
             var correctFen = game.History.Last().ToFenString();
             if (fenAfterMove == correctFen)
             {
-                
-                if(chessProblemEntity.moveOffsetNumber + 1 == chessProblemResponse.Data.ForcedLine.Length)
+
+                if (chessProblemEntity.moveOffsetNumber + 1 == chessProblemResponse.Data.ForcedLine.Length)
                 {
                     _chessPortalRepository.DeleteChessProblem(chessProblemEntity.Id);
                     if (!_chessPortalRepository.Save())
@@ -98,24 +96,27 @@ namespace ChessPortal.Handlers
                     }
                     var user = _chessPortalRepository.GetPlayerById(playerId);
                     user.NumberOfProblemsSolved += 1;
-                    if(!await _chessPortalRepository.UpdateUser(user))
+                    if (!await _chessPortalRepository.UpdateUser(user))
                     {
                         return TryMoveResult.Error;
                     }
                     return TryMoveResult.SuccessProblemSolved;
                 }
-                else
+
+                chessProblemEntity.moveOffsetNumber = chessProblemEntity.moveOffsetNumber + 2;
+                if (!_chessPortalRepository.Save())
                 {
-                    chessProblemEntity.moveOffsetNumber = chessProblemEntity.moveOffsetNumber + 2;
-                    if (!_chessPortalRepository.Save())
-                    {
-                        return TryMoveResult.Error;
-                    }
-                    return TryMoveResult.SuccessProblemNotSolved;
+                    return TryMoveResult.Error;
                 }
-                
+                return TryMoveResult.SuccessProblemNotSolved;
+
             }
             _chessPortalRepository.DeleteChessProblem(chessProblemEntity.Id);
+            var player = _chessPortalRepository.GetPlayerById(playerId);
+            if (!await _chessPortalRepository.UpdateUser(player))
+            {
+                return TryMoveResult.Error;
+            }
             if (!_chessPortalRepository.Save())
             {
                 return TryMoveResult.Error;
@@ -136,6 +137,7 @@ namespace ChessPortal.Handlers
             {
                 game.UpdateGame(chessProblemResponse.Data.ForcedLine[i]);
             }
+            game.GameStatus = GameStatus.Ongoing;
             return game;
         }
     }

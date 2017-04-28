@@ -117,7 +117,7 @@ namespace ChessPortal.Models.Chess
             if (GameStatus == GameStatus.NotStarted || GameStatus == GameStatus.Ongoing)
             {
                 var validMoveCandidates = GetValidMoveCandidates();
-                var detailedMove = validMoveCandidates.SingleOrDefault(m => m == move);                
+                var detailedMove = validMoveCandidates.SingleOrDefault(m => m == move);
                 if (detailedMove == null)
                 {
                     return false;
@@ -138,20 +138,7 @@ namespace ChessPortal.Models.Chess
 
                 MoveList.Add(move);
 
-                if (GameStatus == GameStatus.NotStarted)
-                {
-                    GameStatus = GameStatus.Ongoing;
-                }
-
-                if (IsCheckMate(move.Color == Color.White ? Color.Black : Color.White))
-                {
-                    GameStatus = newPosition.WhiteToMove ? GameStatus.BlackWins : GameStatus.WhiteWins;
-                }
-
-                if (IsDrawByStalemate(move.Color == Color.White ? Color.Black : Color.White) && IsDrawByThreeFoldRepetition() || IsDrawByFiftyMoveRule() || IsDrawByInsufficientMaterial())
-                {
-                    GameStatus = GameStatus.Draw;
-                }
+                SetGameStatus(move, newPosition);
 
                 return true;
             }
@@ -164,30 +151,21 @@ namespace ChessPortal.Models.Chess
             int toX = 0;
             int toY = 0;
             var color = position.WhiteToMove ? Color.White : Color.Black;
-            //move is castle
-            if (move == "O-O" || move == "O-O-O")
+            var validMoveCandidates = GetValidMoveCandidates();
+            if (IsCastle(move))
             {
-                var fromX = 4;
-                var fromY = position.WhiteToMove ? 0 : 7;
-                toX = move == "O-O" ? 6 : 2;
-                toY = fromY;
-                UpdateGame(new Move(Piece.King, fromX, toX, fromY, toY, color, null)
-                {
-                    IsCastle = true
-                });
+                return Castle(move, position, color);
             }
             bool isCapture = false;
-            //check if move is capture and remove corresponding character.
-            if (move.Any(c => c == 'x'))
+            if (IsCapture(move))
             {
                 isCapture = true;
                 move = move.Replace("x", "");
             }
-            //remove any + sign indicating that the move is check
-            if (move.Any(c => c == '+'))
+            if (IsCheck(move))
             {
                 move = move.Replace("+", "");
-            }           
+            }
             try
             {
                 toX = (int)Enum.Parse(typeof(AlgebraicNotationLetters), move[move.Length - 2].ToString());
@@ -197,54 +175,22 @@ namespace ChessPortal.Models.Chess
             {
                 throw new ArgumentException("move is not in algebraic notation format");
             }
-            
-            //move is pawn move.
-            if (move.First().ToString().ToLower() == move.First().ToString())
-            {                
+            if (IsPawnMove(move))
+            {
                 Piece? promoteTo = null;
-                if (move.Any(c => c == '='))
+                if (IsPawnPromotion(move))
                 {
                     promoteTo = Square.FromFenChar(move.Last()).Piece;
                     move = move.Substring(0, move.Length - 2);
                 }
-                int fromX = 0;
-                int fromY = 0;
-                var validMoveCandidates = GetValidMoveCandidates();
-                try
-                {
-                    fromX = (int)Enum.Parse(typeof(AlgebraicNotationLetters), move.First().ToString());
-                }
-                catch
-                {
-                    throw new ArgumentException("move is not in algebraic notation format");
-                }
-                if (!string.IsNullOrEmpty(position.EnPassantCaptureLocationIfSetupFromFen) && 
-                    position.EnPassantCaptureLocationIfSetupFromFen == move.Substring(move.Length - 2))
-                {
-                    position.EnPassantCaptureLocationIfSetupFromFen = string.Empty;
-                    return UpdateGame(new Move(Piece.Pawn, fromX, toX, color == Color.White ? 4 : 3, toY, color, null)
-                    {
-                        IsEnPassant = true
-                    });
-                }
-                for (int i = 0; i < BoardCharacteristics.SideLength; i++)
-                {
-                    var square = position[fromX, i];
-                    if (square.Color.HasValue && square.Color == color && square.Piece.HasValue && square.Piece.Value == Piece.Pawn)
-                    {
-                        fromY = i;
-                        var moveCandidate = new Move(Piece.Pawn, fromX, toX, fromY, toY, color, promoteTo)
-                        {
-                            IsCapture = isCapture
-                        };
-                        if (validMoveCandidates.Contains(moveCandidate))
-                        {
-                            return UpdateGame(moveCandidate);
-                        }
-                    }
-                }
+                return ProcessPawnMove(move, position, toX, toY, color, promoteTo, isCapture, validMoveCandidates);
             }
-            var piece = Square.FromFenChar(move[0]).Piece.Value;            
+            var piece = Square.FromFenChar(move[0]).Piece.Value;
+            return ProcessNonPawnMove(move, position, toX, toY, color, piece, isCapture, validMoveCandidates);
+        }
+
+        bool ProcessNonPawnMove(string move, ChessPosition position, int toX, int toY, Color color, Piece piece, bool isCapture, IList<Move> validMoveCandidates)
+        {
             if (move.Length == 4)
             {
                 var rankOrFileIdentifier = move[1];
@@ -254,31 +200,27 @@ namespace ChessPortal.Models.Chess
                     for (int i = 0; i < BoardCharacteristics.SideLength; i++)
                     {
                         var square = position[i, number - 1];
-                        if (square.Color.HasValue && square.Color == color && square.Piece.HasValue && square.Piece.Value == piece)
+                        var fromX = i;
+                        var fromY = number - 1;
+                        if (UpdateGameIfPieceFound(square, fromX, fromY, toX, toY, color, piece, isCapture,
+                            validMoveCandidates))
                         {
-                            var moveCandidate = new Move(piece, i, toX, number - 1, toY, square.Color.Value, null)
-                            {
-                                IsCapture = isCapture
-                            };
-                            return UpdateGame(moveCandidate);
+                            return true;
                         }
                     }
-                    return false;
                 }
                 else
                 {
-                    var fileNumber = (int)Enum.Parse(typeof(AlgebraicNotationLetters), rankOrFileIdentifier.ToString());
+                    number = (int)Enum.Parse(typeof(AlgebraicNotationLetters), rankOrFileIdentifier.ToString());
                     for (int i = 0; i < BoardCharacteristics.SideLength; i++)
                     {
-
-                        var square = position[fileNumber, i];
-                        if (square.Color.HasValue && square.Color == color && square.Piece.HasValue && square.Piece.Value == piece)
+                        var fromX = number;
+                        var fromY = i;
+                        var square = position[number, i];
+                        if (UpdateGameIfPieceFound(square, fromX, fromY, toX, toY, color, piece, isCapture,
+                            validMoveCandidates))
                         {
-                            var moveCandidate = new Move(piece, fileNumber, toX, i, toY, square.Color.Value, null)
-                            {
-                                IsCapture = isCapture
-                            };
-                            return UpdateGame(moveCandidate);
+                            return true;
                         }
                     }
                 }
@@ -290,22 +232,137 @@ namespace ChessPortal.Models.Chess
                     for (int j = 0; j < BoardCharacteristics.SideLength; j++)
                     {
                         var square = position[j, i];
-                        if (square.Color.HasValue && square.Color == color && square.Piece.HasValue && square.Piece.Value == piece)
+                        var fromX = j;
+                        var fromY = i;
+                        if (UpdateGameIfPieceFound(square, fromX, fromY, toX, toY, color, piece, isCapture, validMoveCandidates))
                         {
-                            var moveCandidate = new Move(piece, j, toX, i, toY, color, null)
-                            {
-                                IsCapture = isCapture
-                            };
-                            var validMoveCandidates = GetValidMoveCandidates();
-                            if (validMoveCandidates.Contains(moveCandidate))
-                            {
-                                return UpdateGame(moveCandidate);
-                            }
+                            return true;
                         }
                     }
                 }
             }
             return false;
+        }
+
+        bool UpdateGameIfPieceFound(Square square, int fromX, int fromY, int toX, int toY, Color color, Piece piece, bool isCapture, IList<Move> validMoveCandidates)
+        {
+            if (square.Color.HasValue && square.Color == color && square.Piece.HasValue && square.Piece.Value == piece)
+            {
+                var moveCandidate = new Move(piece, fromX, toX, fromY, toY, color, null)
+                {
+                    IsCapture = isCapture
+                };
+                if (validMoveCandidates.Contains(moveCandidate))
+                {
+                    return UpdateGame(moveCandidate);
+                }
+            }
+            return false;
+        }
+
+        bool ProcessPawnMove(string move, ChessPosition position, int toX, int toY, Color color, Piece? promoteTo, bool isCapture, IList<Move> validMoveCandidates)
+        {
+            int fromX = 0;
+            int fromY = 0;
+            try
+            {
+                fromX = (int)Enum.Parse(typeof(AlgebraicNotationLetters), move.First().ToString());
+            }
+            catch
+            {
+                throw new ArgumentException("move is not in algebraic notation format");
+            }
+            if (MoveIsFirstMoveInProblemAndPawnMoveIsEnpassant(position, move))
+            {
+                position.EnPassantCaptureLocationIfSetupFromFen = string.Empty;
+                return UpdateGame(new Move(Piece.Pawn, fromX, toX, color == Color.White ? 4 : 3, toY, color, null)
+                {
+                    IsEnPassant = true
+                });
+            }
+            return FindPawnAndUpdateGame(position, fromX, color, fromY, toX, toY, null, isCapture, validMoveCandidates);
+        }
+
+        bool FindPawnAndUpdateGame(ChessPosition position, int fromX, Color color, int fromY, int toX, int toY, Piece? promoteTo, bool isCapture, IList<Move> validMoveCandidates)
+        {
+            for (int i = 0; i < BoardCharacteristics.SideLength; i++)
+            {
+                var square = position[fromX, i];
+                if (square.Color.HasValue && square.Color == color && square.Piece.HasValue && square.Piece.Value == Piece.Pawn)
+                {
+                    fromY = i;
+                    var moveCandidate = new Move(Piece.Pawn, fromX, toX, fromY, toY, color, promoteTo)
+                    {
+                        IsCapture = isCapture
+                    };
+                    if (validMoveCandidates.Contains(moveCandidate))
+                    {
+                        return UpdateGame(moveCandidate);
+                    }
+                }
+            }
+            throw new ArgumentException("move is not in algebraic notation format");
+        }
+
+        bool MoveIsFirstMoveInProblemAndPawnMoveIsEnpassant(ChessPosition position, string move)
+        {
+            return !string.IsNullOrEmpty(position.EnPassantCaptureLocationIfSetupFromFen) &&
+                    position.EnPassantCaptureLocationIfSetupFromFen == move.Substring(move.Length - 2);
+        }
+
+        bool IsPawnPromotion(string move)
+        {
+            return move.Any(c => c == '=');
+        }
+
+        bool IsPawnMove(string move)
+        {
+            return move.First().ToString().ToLower() == move.First().ToString();
+        }
+
+        bool IsCapture(string move)
+        {
+            return move.Any(c => c == 'x');
+        }
+
+        bool IsCheck(string move)
+        {
+            return move.Any(c => c == '+');
+        }
+
+        bool Castle(string move, ChessPosition position, Color color)
+        {
+            var fromX = 4;
+            var fromY = position.WhiteToMove ? 0 : 7;
+            var toX = move == "O-O" ? 6 : 2;
+            var toY = fromY;
+            return UpdateGame(new Move(Piece.King, fromX, toX, fromY, toY, color, null)
+            {
+                IsCastle = true
+            });
+        }
+
+        bool IsCastle (string move)
+        {
+            return move == "O-O" || move == "O-O-O";
+        }
+
+        void SetGameStatus(Move move, ChessPosition newPosition)
+        {
+            if (GameStatus == GameStatus.NotStarted)
+            {
+                GameStatus = GameStatus.Ongoing;
+            }
+
+            if (IsCheckMate(move.Color == Color.White ? Color.Black : Color.White))
+            {
+                GameStatus = newPosition.WhiteToMove ? GameStatus.BlackWins : GameStatus.WhiteWins;
+            }
+
+            if (IsDrawByStalemate(move.Color == Color.White ? Color.Black : Color.White) && IsDrawByThreeFoldRepetition() || IsDrawByFiftyMoveRule() || IsDrawByInsufficientMaterial())
+            {
+                GameStatus = GameStatus.Draw;
+            }
         }
 
         IList<Move> GetValidMoveCandidates()
@@ -319,110 +376,166 @@ namespace ChessPortal.Models.Chess
                     var square = position[j, i];
                     if (square.Piece.HasValue && square.Color.HasValue && IsOwnColor(square.Color.Value))
                     {
-                        if (square.Piece == Piece.Pawn && i == (square.Color == Color.White ? 1 : 6))
-                        {
-                            var direction = RuleInfo.PawnMoveDirection[square.Color.Value];
-                            var yModifier = direction == Direction.North ? 2 : -2;
-                            if (position.GetNearestOccupiedSquare(j, i, direction, 2).Square.Piece == null)
-                            {
-                                AddMoveToListIfValid(validMoves,
-                                    new Move(Piece.Pawn, j, j, i, i + yModifier, square.Color.Value, null), position);
-
-                            }
-                        }
-                        else if (square.Piece == Piece.Pawn && i == (square.Color == Color.White ? 4 : 3))
-                        {
-                            foreach (Direction direction in RuleInfo.PawnCaptureDirections[square.Color.Value])
-                            {
-                                var modifiers = direction.GetModifiers();
-                                var move = new Move(Piece.Pawn, j, j + modifiers[0], i, i + modifiers[1], square.Color.Value, null);
-                                if (move.PawnCanCaptureEnPassant(position, MoveList))
-                                {
-                                    move.IsEnPassant = true;
-                                    AddMoveToListIfValid(validMoves, move, position);
-                                }
-                            }
-                        }
-                        if (square.Piece == Piece.Pawn)
-                        {
-                            foreach (Direction direction in RuleInfo.PawnCaptureDirections[square.Color.Value])
-                            {
-                                var modifiers = direction.GetModifiers();
-                                if (IsValidChessBoardCoordinates(j + modifiers[0], i + modifiers[1]) &&
-                                    position[j + modifiers[0], i + modifiers[1]].Color.HasValue &&
-                                    !IsOwnColor(position[j + modifiers[0], i + modifiers[1]].Color.Value))
-                                {
-                                    AddMoveToListIfValid(validMoves,
-                                        new Move(Piece.Pawn, j, j + modifiers[0], i, i + modifiers[1],
-                                            square.Color.Value, null)
-                                        {
-                                            IsCapture = true
-                                        }, position);
-                                }
-                            }
-
-                            var pawnMoveDirection = RuleInfo.PawnMoveDirection[square.Color.Value];
-                            var yModifier = pawnMoveDirection == Direction.North ? 1 : -1;
-                            if (!position[j, i + yModifier].Piece.HasValue)
-                            {
-                                var move = new Move(Piece.Pawn, j, j, i, i + yModifier, square.Color.Value, null);
-                                if (!position.UpdateBoardIfValid(move).ContentEquals(position))
-                                {
-                                    validMoves.Add(new Move(Piece.Pawn, j, j, i, i + yModifier, square.Color.Value, null));
-                                }
-                            }
-
-
-                        }
-                        if (square.Piece == Piece.King && j == 4 && i == (square.Color == Color.White ? 0 : 7))
-                        {
-                            var move1 = new Move(Piece.King, j, j + 2, i, i, square.Color.Value, null);
-                            var move2 = new Move(Piece.King, j, j - 2, i, i, square.Color.Value, null);
-                            if (move1.KingCanCastle(MoveList, History.Last()))
-                            {
-                                move1.IsCastle = true;
-                                validMoves.Add(move1);
-                            }
-                            if (move2.KingCanCastle(MoveList, History.Last()))
-                            {
-                                move2.IsCastle = true;
-                                validMoves.Add(move2);
-                            }
-                        }
-                        if (square.Piece != Piece.Pawn)
-                        {
-                            foreach (Direction direction in RuleInfo.ValidDirections[square.Piece.Value])
-                            {
-                                var modifiers = direction.GetModifiers();
-                                int length = 1;
-                                while (IsValidChessBoardCoordinates(j + length * modifiers[0], i + length * modifiers[1]) &&
-                                       length <= RuleInfo.MaximumMoveLength[square.Piece.Value] &&
-                                       !position[j + length * modifiers[0], i + length * modifiers[1]].Color.HasValue)
-                                {
-                                    AddMoveToListIfValid(validMoves,
-                                        new Move(square.Piece.Value, j, j + length * modifiers[0], i,
-                                            i + length * modifiers[1], square.Color.Value, null), position);
-                                    length++;
-                                }
-
-                                if (IsValidChessBoardCoordinates(j + length * modifiers[0], i + length * modifiers[1]) && length <= RuleInfo.MaximumMoveLength[square.Piece.Value] &&
-                                    position[j + length * modifiers[0], i + length * modifiers[1]].Color.HasValue &&
-                                    !IsOwnColor(position[j + length * modifiers[0], i + length * modifiers[1]].Color.Value))
-                                {
-                                    AddMoveToListIfValid(validMoves,
-                                        new Move(square.Piece.Value, j, j + length * modifiers[0], i,
-                                            i + length * modifiers[1], square.Color.Value, null)
-                                        {
-                                            IsCapture = true
-                                        }, position);
-
-                                }
-                            }
-                        }
+                        FindValidMovesForPiece(square, i, j, position, validMoves);
                     }
                 }
             }
             return validMoves;
+        }
+
+        void FindValidMovesForPiece(Square square, int y, int x, ChessPosition position, IList<Move> validMoves)
+        {
+            
+            if (square.Piece == Piece.King)
+            {
+                AddCastlingMovesIfValid(square, y, x, position, validMoves);
+            }
+            if (square.Piece == Piece.Pawn)
+            {
+                FindValidMovesForPawn(square, y, x, position, validMoves);
+            }
+            else
+            {
+                AddValidCommonMovesForNonPawn(square, y, x, position, validMoves);
+            }
+        }
+
+        void AddValidCommonMovesForNonPawn(Square square, int y, int x, ChessPosition position, IList<Move> validMoves)
+        {
+            foreach (Direction direction in RuleInfo.ValidDirections[square.Piece.Value])
+            {
+                var modifiers = direction.GetModifiers();
+                int length = 1;
+                while (NonPawnCanMove(y, x, length, modifiers, square, position))
+                {
+                    AddMoveToListIfValid(validMoves,
+                        new Move(square.Piece.Value, x, x + length * modifiers[0], y,
+                            y + length * modifiers[1], square.Color.Value, null), position);
+                    length++;
+                }
+
+                if (NonPawnCanCapture(y, x, length, modifiers, square, position))
+                {
+                    AddMoveToListIfValid(validMoves,
+                        new Move(square.Piece.Value, x, x + length * modifiers[0], y,
+                            y + length * modifiers[1], square.Color.Value, null)
+                        {
+                            IsCapture = true
+                        }, position);
+
+                }
+            }
+        }
+
+        bool NonPawnCanCapture(int y, int x, int length, int[] modifiers, Square square, ChessPosition position)
+        {
+            return IsValidChessBoardCoordinates(x + length * modifiers[0], y + length * modifiers[1]) && length <= RuleInfo.MaximumMoveLength[square.Piece.Value] &&
+                    position[x + length * modifiers[0], y + length * modifiers[1]].Color.HasValue &&
+                    !IsOwnColor(position[x + length * modifiers[0], y + length * modifiers[1]].Color.Value);
+        }
+
+        bool NonPawnCanMove(int y, int x, int length, int[] modifiers, Square square, ChessPosition position)
+        {
+            return IsValidChessBoardCoordinates(x + length * modifiers[0], y + length * modifiers[1]) &&
+                       length <= RuleInfo.MaximumMoveLength[square.Piece.Value] &&
+                       !position[x + length * modifiers[0], y + length * modifiers[1]].Color.HasValue;
+        }
+
+        void AddCastlingMovesIfValid(Square square, int y, int x, ChessPosition position, IList<Move> validMoves)
+        {
+            if (x == 4 && y == (square.Color == Color.White ? 0 : 7))
+            {
+                var move1 = new Move(Piece.King, x, x + 2, y, y, square.Color.Value, null);
+                var move2 = new Move(Piece.King, x, x - 2, y, y, square.Color.Value, null);
+                if (move1.KingCanCastle(MoveList, position))
+                {
+                    move1.IsCastle = true;
+                    validMoves.Add(move1);
+                }
+                if (move2.KingCanCastle(MoveList, position))
+                {
+                    move2.IsCastle = true;
+                    validMoves.Add(move2);
+                }
+            }
+        }
+
+        void FindValidMovesForPawn(Square square, int y, int x, ChessPosition position, IList<Move> validMoves)
+        {
+            AddLongPawnMoveIfValid(square, y, x, position, validMoves);
+            AddEnPassantIfValid(square, y, x, position, validMoves);
+            AddValidCommonMovesForPawn(square, y, x, position, validMoves);
+        }
+
+        void AddValidCapturesForPawn(Square square, int y, int x, ChessPosition position, IList<Move> validMoves)
+        {
+            foreach (Direction direction in RuleInfo.PawnCaptureDirections[square.Color.Value])
+            {
+                var modifiers = direction.GetModifiers();
+                if (IsValidChessBoardCoordinates(x + modifiers[0], y + modifiers[1]) &&
+                    position[x + modifiers[0], y + modifiers[1]].Color.HasValue &&
+                    !IsOwnColor(position[x + modifiers[0], y + modifiers[1]].Color.Value))
+                {
+                    AddMoveToListIfValid(validMoves,
+                        new Move(Piece.Pawn, x, x + modifiers[0], y, y + modifiers[1],
+                            square.Color.Value, null)
+                        {
+                            IsCapture = true
+                        }, position);
+                }
+            }
+        }
+
+        void AddForwardMoveForPawnIfValid(Square square, int y, int x, ChessPosition position, IList<Move> validMoves)
+        {
+            var pawnMoveDirection = RuleInfo.PawnMoveDirection[square.Color.Value];
+            var yModifier = pawnMoveDirection == Direction.North ? 1 : -1;
+            if (!position[x, y + yModifier].Piece.HasValue)
+            {
+                var move = new Move(Piece.Pawn, x, x, y, y + yModifier, square.Color.Value, null);
+                if (!position.UpdateBoardIfValid(move).ContentEquals(position))
+                {
+                    validMoves.Add(new Move(Piece.Pawn, x, x, y, y + yModifier, square.Color.Value, null));
+                }
+            }
+        }
+
+        void AddValidCommonMovesForPawn(Square square, int y, int x, ChessPosition position, IList<Move> validMoves)
+        {
+            AddValidCapturesForPawn(square, y, x, position, validMoves);
+            AddForwardMoveForPawnIfValid(square, y, x, position, validMoves);
+        }
+
+        void AddEnPassantIfValid(Square square, int i, int j, ChessPosition position, IList<Move> validMoves)
+        {
+            if (i == (square.Color == Color.White ? 4 : 3))
+            {
+                foreach (Direction direction in RuleInfo.PawnCaptureDirections[square.Color.Value])
+                {
+                    var modifiers = direction.GetModifiers();
+                    var move = new Move(Piece.Pawn, j, j + modifiers[0], i, i + modifiers[1], square.Color.Value, null);
+                    if (move.PawnCanCaptureEnPassant(position, MoveList))
+                    {
+                        move.IsEnPassant = true;
+                        AddMoveToListIfValid(validMoves, move, position);
+                    }
+                }
+            }
+        }
+
+        void AddLongPawnMoveIfValid(Square square, int y, int x, ChessPosition position, IList<Move> validMoves)
+        {
+            if (y == (square.Color == Color.White ? 1 : 6))
+            {
+                var direction = RuleInfo.PawnMoveDirection[square.Color.Value];
+                var yModifier = direction == Direction.North ? 2 : -2;
+                if (position.GetNearestOccupiedSquare(x, y, direction, 2).Square.Piece == null)
+                {
+                    AddMoveToListIfValid(validMoves,
+                        new Move(Piece.Pawn, x, x, y, y + yModifier, square.Color.Value, null), position);
+
+                }
+            }
         }
 
         void AddMoveToListIfValid(IList<Move> moves, Move move, ChessPosition position)

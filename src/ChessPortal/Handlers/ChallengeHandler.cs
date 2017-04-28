@@ -70,35 +70,10 @@ namespace ChessPortal.Handlers
         public ValidationResult ValidateMove(MoveDto moveDto, Guid challengeId, string playerId)
         {
             var challenge = _chessPortalRepository.GetChallenge(challengeId);
-            if (!ChallengeIsCreatedOrAcceptedByPlayer(challengeId, playerId))
+            var validationResult = ValidateMoveContext(challengeId, playerId, challenge, moveDto);
+            if (validationResult != ValidationResult.Success)
             {
-                return ValidationResult.WrongPlayer;
-            }
-            if (challenge.Status != GameStatus.Ongoing && challenge.Status != GameStatus.NotStarted)
-            {
-                return ValidationResult.GameOver;
-            }
-            if (!PlayerHasTheMove(challenge, playerId))
-            {
-                return ValidationResult.OtherPlayersTurn;
-            }
-            if (!MoveColorIsCorrect(moveDto, challenge, playerId))
-            {
-                return ValidationResult.WrongColor;
-            }
-            if (!MoveIsPawnPromotion(moveDto) && moveDto.PromoteTo != null)
-            {
-                return ValidationResult.InvalidPromotion;
-            }
-            if (MoveIsPawnPromotion(moveDto) && (!moveDto.PromoteTo.HasValue || moveDto.PromoteTo.Value == Piece.Pawn))
-            {
-                return ValidationResult.NotEnoughPromotionInformation;
-            }
-
-            if (GameExpired(challenge))
-            {
-                var playerIsWhite = PlayerIsWhite(challenge, playerId);
-                return playerIsWhite ? ValidationResult.WhiteLostOnTime : ValidationResult.BlackLostOnTime;
+                return validationResult;
             }
             var game = new ChessGame(challenge.DaysPerMove);
             foreach (MoveEntity moveEntity in challenge.Moves)
@@ -216,6 +191,41 @@ namespace ChessPortal.Handlers
                 return _chessPortalRepository.Save();
             }
             return true;
+        }
+
+        ValidationResult ValidateMoveContext(Guid challengeId, string playerId, ChallengeEntity challenge, MoveDto moveDto)
+        {
+            if (!ChallengeIsCreatedOrAcceptedByPlayer(challengeId, playerId))
+            {
+                return ValidationResult.WrongPlayer;
+            }
+            if (challenge.Status != GameStatus.Ongoing && challenge.Status != GameStatus.NotStarted)
+            {
+                return ValidationResult.GameOver;
+            }
+            if (!PlayerHasTheMove(challenge, playerId))
+            {
+                return ValidationResult.OtherPlayersTurn;
+            }
+            if (!MoveColorIsCorrect(moveDto, challenge, playerId))
+            {
+                return ValidationResult.WrongColor;
+            }
+            if (!MoveIsPawnPromotion(moveDto) && moveDto.PromoteTo != null)
+            {
+                return ValidationResult.InvalidPromotion;
+            }
+            if (MoveIsPawnPromotion(moveDto) && (!moveDto.PromoteTo.HasValue || moveDto.PromoteTo.Value == Piece.Pawn))
+            {
+                return ValidationResult.NotEnoughPromotionInformation;
+            }
+
+            if (GameExpired(challenge))
+            {
+                var playerIsWhite = PlayerIsWhite(challenge, playerId);
+                return playerIsWhite ? ValidationResult.WhiteLostOnTime : ValidationResult.BlackLostOnTime;
+            }
+            return ValidationResult.Success;
         }
 
         bool DrawRequestIsMadeByPlayer(Guid challengeId, string playerId)

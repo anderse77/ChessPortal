@@ -12,7 +12,7 @@ namespace ChessPortal.DataInterfaces
     public interface IChessPortalRepository
     {
         void AddChallenge(ChallengeEntity challenge);
-        IEnumerable<ChallengeEntity> GetChallenges(string playerId);
+        IEnumerable<ChallengeEntity> GetChallengesThatPlayerCanAccept(string playerId);
         bool ChallengeExists(Guid challengeId);
         bool ChallengeIsAccepted(Guid challengeId);
         bool ChallengeIsCreatedByPlayer(Guid challengeId, string playerId);

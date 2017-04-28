@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using ChessPortal.DataInterfaces;
+using ChessPortal.Entities;
 using ChessPortal.Models.Dtos;
 
 namespace ChessPortal.DtoProviders
@@ -20,17 +21,7 @@ namespace ChessPortal.DtoProviders
 
         public IEnumerable<ChallengeDto> GetChallengeDtos(string playerId)
         {
-            return Mapper.Map<IEnumerable<ChallengeDto>>(_repository.GetChallenges(playerId));
-        }
-
-        public IEnumerable<ChallengeDto> GetGames(string playerId)
-        {
-            var games = Mapper.Map<IEnumerable<ChallengeDto>>(_repository.GetAcceptedChallengesForPlayer(playerId)).ToList();
-            foreach (ChallengeDto game in games)
-            {
-                game.Moves = game.Moves.OrderBy(m => m.MoveNumber).ToList();
-            }
-            return games;
+            return Mapper.Map<IEnumerable<ChallengeDto>>(_repository.GetChallengesThatPlayerCanAccept(playerId));
         }
     }
 }

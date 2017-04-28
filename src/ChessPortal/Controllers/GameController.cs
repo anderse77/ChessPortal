@@ -22,14 +22,17 @@ namespace ChessPortal.Controllers
     {
         private readonly IChallengeHandler _challengeHandler;
         private readonly IChallengeDtoProvider _challengeDtoProvider;
+        private readonly IGameDtoProvider _gameDtoProvider;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public GameController(IChallengeHandler challengeHandler,
             IChallengeDtoProvider challengeDtoProvider,
+            IGameDtoProvider gameDtoProvider,
             IHttpContextAccessor httpContextAccessor)
         {
             _challengeHandler = challengeHandler;
             _challengeDtoProvider = challengeDtoProvider;
+            _gameDtoProvider = gameDtoProvider;
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -45,13 +48,13 @@ namespace ChessPortal.Controllers
             if (ModelState.IsValid)
             {
                 var challengeEntity = Mapper.Map<ChallengeEntity>(challengeDto);
-                if (!_challengeHandler.SetupAndSaveChallenge(challengeEntity,
-                    _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value))
+                var playerId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+                if (!_challengeHandler.SetupAndSaveChallenge(challengeEntity, playerId))
                 {
                     return StatusCode(500, "A problem happened while handling your request.");
                 }
 
-                return Ok();
+                return Ok("Challenge created");
             }
 
             return BadRequest(ModelState);
@@ -59,7 +62,7 @@ namespace ChessPortal.Controllers
 
         [HttpGet("challenge")]
         [Authorize]
-        public IActionResult GetChallenges()
+        public IActionResult GetChallengesThatPlayerCanAccept()
         {
             var playerId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
             return Ok(_challengeDtoProvider.GetChallengeDtos(playerId));
@@ -99,7 +102,7 @@ namespace ChessPortal.Controllers
         public IActionResult GetGames()
         {
             var playerId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            return Ok(_challengeDtoProvider.GetGames(playerId));
+            return Ok(_gameDtoProvider.GetGames(playerId));
         }
 
         [HttpPost("move")]
@@ -166,7 +169,7 @@ namespace ChessPortal.Controllers
                     return Ok("You won!");
 
             }
-            return Ok("Moved");
+            return Ok("Move accepted");
         }
 
         [HttpPost("draw/request")]

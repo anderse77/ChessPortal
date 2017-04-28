@@ -8,6 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using ChessPortal.ExtensionMethods.ChessboardExtensions;
+using Microsoft.EntityFrameworkCore.Query.Expressions;
 using Microsoft.VisualBasic.CompilerServices;
 
 namespace ChessPortal.Models.Chess
@@ -82,33 +83,27 @@ namespace ChessPortal.Models.Chess
             {
                 for (int j = 0; j < newBoard.GetLength(0); j++)
                 {
-                    if (j == move.FromX && i == move.FromY)
+                    if (PieceLeftCoordinates(move, j, i))
                     {
                         newBoard[j, i] = new Square();
                     }
-                    else if (j == move.ToX && i == move.ToY)
+                    else if (PieceWentToCoordinates(move, j, i))
                     {
-                        newBoard[j, i] = move.Piece == Piece.Pawn &&
-                                         (move.Color == Color.White ? move.ToY == 7 : move.ToY == 0)
+                        newBoard[j, i] = MoveIsPawnPromotion(move)
                             ? new Square(move.PromoteTo ?? Piece.Queen, move.Color)
                             : new Square(move.Piece, move.Color);
                     }
-                    else if (move.IsEnPassant && j == move.FromX + move.Direction.GetModifiers()[0] &&
-                             i == move.FromY)
+                    else if (MoveIsEnPassantAndPawnIsTakenAtCoordinates(move, j, i))
                     {
                         newBoard[j, i] = new Square();
                     }
-                    else if (move.IsCastle &&
-                             ((j == (move.Direction == Direction.East ? (move.ToX == 6 ? 7 : 0) : (move.ToX == 2 ? 0 : 7)) &&
-                              i == (move.Color == Color.White ? 0 : 7)) ||
-                             (j == (move.Direction == Direction.East ? move.ToX - 1 : move.ToX + 1) && i == move.ToY)))
+                    else if (MoveIsCastleAndRookWentToOrFromCoordinates(move, j, i))
                     {
-                        if (j == (move.Direction == Direction.East ? (move.ToX == 6 ? 7 : 0) : (move.ToX == 2 ? 0 : 7)) &&
-                            i == (move.Color == Color.White ? 0 : 7))
+                        if (MoveIsCatleAndRookWentFromCoordinates(move, j, i))
                         {
                             newBoard[j, i] = new Square();
                         }
-                        if (j == (move.Direction == Direction.East ? move.ToX - 1 : move.ToX + 1) && i == move.ToY)
+                        if (MoveIsCastleAndRookWentToCoordinates(move, j, i))
                         {
                             newBoard[j, i] = new Square(Piece.Rook, move.Color);
                         }
@@ -203,6 +198,47 @@ namespace ChessPortal.Models.Chess
             fen.Remove(fen.Length - 1, 1);
             fen.Append(WhiteToMove ? " w" : " b");
             return fen.ToString();
+        }
+
+        bool MoveIsCastleAndRookWentToCoordinates(Move move, int x, int y)
+        {
+            return x == (move.Direction == Direction.East ? move.ToX - 1 : move.ToX + 1) && y == move.ToY;
+        }
+
+        bool MoveIsCatleAndRookWentFromCoordinates(Move move, int x, int y)
+        {
+            return x == (move.Direction == Direction.East ? (move.ToX == 6 ? 7 : 0) : (move.ToX == 2 ? 0 : 7)) &&
+                   y == (move.Color == Color.White ? 0 : 7);
+        }
+
+        bool MoveIsCastleAndRookWentToOrFromCoordinates(Move move, int x, int y)
+        {
+            return move.IsCastle &&
+                   ((x == (move.Direction == Direction.East ? (move.ToX == 6 ? 7 : 0) : (move.ToX == 2 ? 0 : 7)) &&
+                     y == (move.Color == Color.White ? 0 : 7)) ||
+                    (x == (move.Direction == Direction.East ? move.ToX - 1 : move.ToX + 1) && y == move.ToY));
+        }
+
+        bool MoveIsEnPassantAndPawnIsTakenAtCoordinates(Move move, int x, int y)
+        {
+            return move.IsEnPassant && x == move.FromX + move.Direction.GetModifiers()[0] &&
+                   y == move.FromY;
+        }
+
+        bool MoveIsPawnPromotion(Move move)
+        {
+            return move.Piece == Piece.Pawn &&
+                   (move.Color == Color.White ? move.ToY == 7 : move.ToY == 0);
+        }
+
+        bool PieceLeftCoordinates(Move move, int x, int y)
+        {
+            return x == move.FromX && y == move.FromY;
+        }
+
+        bool PieceWentToCoordinates(Move move, int x, int y)
+        {
+            return x == move.ToX && y == move.ToY;
         }
 
         IEnumerator IEnumerable.GetEnumerator()

@@ -64,6 +64,7 @@ namespace ChessPortal
             services.AddScoped<IChessPortalRepository, ChessPortalRepository>();
             services.AddScoped<IChallengeHandler, ChallengeHandler>();
             services.AddScoped<IChallengeDtoProvider, ChallengeDtoProvider>();
+            services.AddScoped<IGameDtoProvider, GameDtoProvider>();
             services.AddScoped<IChessProblemHandler, ChessProblemHandler>();
 
             services.AddSingleton<IChessProblemService, ChessProblemService>();
@@ -94,6 +95,7 @@ namespace ChessPortal
             {
                 cfg.CreateMap<ChallengeDto, ChallengeEntity>();
                 cfg.CreateMap<ChallengeEntity, ChallengeDto>();
+                cfg.CreateMap<ChallengeEntity, GameDto>();
                 cfg.CreateMap<MoveDto, MoveEntity>();
                 cfg.CreateMap<MoveEntity, MoveDto>();
                 cfg.CreateMap<DrawRequestDto, DrawRequestEntity>();
