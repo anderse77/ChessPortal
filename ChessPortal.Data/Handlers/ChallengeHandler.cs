@@ -178,6 +178,19 @@ namespace ChessPortal.Data.Handlers
             return true;
         }
 
+        public bool ChallengeIsCreatedOrAcceptedByPlayer(Guid challengeId, string playerId)
+        {
+            return _chessPortalRepository.ChallengeIsCreatedOrAcceptedByPlayer(challengeId, playerId);
+        }
+
+        bool PlayerIsWhite(ChallengeEntity challenge, string playerId)
+        {
+            return (challenge.Color == Color.White &&
+                    challenge.PlayerId == playerId) ||
+                   (challenge.Color == Color.Black &&
+                    challenge.PlayerId != playerId);
+        }
+
         ValidationResult ValidateMoveContext(string playerId, ChallengeEntity challenge, MoveDto moveDto)
         {
             if (!ChallengeIsCreatedOrAcceptedByPlayer(challenge.Id, playerId))
@@ -216,12 +229,7 @@ namespace ChessPortal.Data.Handlers
         bool DrawRequestIsMadeByPlayer(Guid challengeId, string playerId)
         {
             return _chessPortalRepository.DrawRequestIsMadeByPlayer(challengeId, playerId);
-        }
-
-        bool ChallengeIsCreatedOrAcceptedByPlayer(Guid challengeId, string playerId)
-        {
-            return _chessPortalRepository.ChallengeIsCreatedOrAcceptedByPlayer(challengeId, playerId);
-        }
+        }       
 
         bool MoveIsPawnPromotion(MoveDto move)
         {
@@ -241,15 +249,7 @@ namespace ChessPortal.Data.Handlers
                 return lastMove.MoveDate.Add(TimeSpan.FromDays(challenge.DaysPerMove)) <= DateTime.Now;
             }
             return false;
-        }
-
-        bool PlayerIsWhite(ChallengeEntity challenge, string playerId)
-        {
-            return (challenge.Color == Color.White &&
-                    challenge.PlayerId == playerId) ||
-                   (challenge.Color == Color.Black &&
-                   challenge.PlayerId != playerId);
-        }
+        }        
 
         bool PlayerHasTheMove(ChallengeEntity challenge, string playerId)
         {

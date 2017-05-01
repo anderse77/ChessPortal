@@ -4,7 +4,7 @@ using ChessPortal.Infrastructure.DataInterfaces;
 using ChessPortal.Infrastructure.Dtos;
 using System.Collections.Generic;
 
-namespace ChessPortal.Infrastructure.DtoProviders
+namespace ChessPortal.Data.DtoProviders
 {
     public class ChallengeDtoProvider : IChallengeDtoProvider
     {

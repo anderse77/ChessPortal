@@ -1,11 +1,11 @@
-﻿using ChessPortal.Data.Entities;
+﻿using ChessPortal.Data.DtoProviders;
+using ChessPortal.Data.Entities;
 using ChessPortal.Data.Handlers;
 using ChessPortal.Data.Repositories;
 using ChessPortal.Data.Repositories.Interfaces;
 using ChessPortal.Data.Services;
 using ChessPortal.Data.Settings;
 using ChessPortal.Infrastructure.DataInterfaces;
-using ChessPortal.Infrastructure.DtoProviders;
 using ChessPortal.Infrastructure.Dtos;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -62,6 +62,7 @@ namespace ChessPortal.Web
             services.AddScoped<IGameDtoProvider, GameDtoProvider>();
             services.AddScoped<IChessProblemHandler, ChessProblemHandler>();
             services.AddScoped<IAccountHandler, AccountHandler>();
+            services.AddScoped<IChessPlayerDtoProvider, ChessPlayerDtoProvider>();
 
             services.AddSingleton<IChessProblemService, ChessProblemService>();
         }

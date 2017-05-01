@@ -5,7 +5,7 @@ using ChessPortal.Infrastructure.Dtos;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ChessPortal.Infrastructure.DtoProviders
+namespace ChessPortal.Data.DtoProviders
 {
     public class GameDtoProvider : IGameDtoProvider
     {

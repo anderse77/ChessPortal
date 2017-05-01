@@ -15,16 +15,19 @@ namespace ChessPortal.Web.Controllers
         private readonly IChallengeHandler _challengeHandler;
         private readonly IChallengeDtoProvider _challengeDtoProvider;
         private readonly IGameDtoProvider _gameDtoProvider;
+        private readonly IChessPlayerDtoProvider _chessPlayerDtoProvider;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public GameController(IChallengeHandler challengeHandler,
             IChallengeDtoProvider challengeDtoProvider,
             IGameDtoProvider gameDtoProvider,
+            IChessPlayerDtoProvider chessPlayerDtoProvider,
             IHttpContextAccessor httpContextAccessor)
         {
             _challengeHandler = challengeHandler;
             _challengeDtoProvider = challengeDtoProvider;
             _gameDtoProvider = gameDtoProvider;
+            _chessPlayerDtoProvider = chessPlayerDtoProvider;
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -57,6 +60,22 @@ namespace ChessPortal.Web.Controllers
         {
             var playerId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
             return Ok(_challengeDtoProvider.GetChallengeDtos(playerId));
+        }
+
+        [HttpGet("challenge/{id}/opponent")]
+        [Authorize]
+        public IActionResult GetOpponentForChallenge(Guid id)
+        {
+            if (!_challengeHandler.ChallengeExists(id))
+            {
+                return NotFound("The challenge does not exist");
+            }
+            var playerId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            if (!_challengeHandler.ChallengeIsCreatedOrAcceptedByPlayer(id, playerId))
+            {
+                return BadRequest("This is not oe of your games");
+            }
+            return Ok(_chessPlayerDtoProvider.GetOpponentForGame(id, playerId));
         }
 
         [HttpPost("challenge/{id}")]
