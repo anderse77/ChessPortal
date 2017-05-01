@@ -36,7 +36,7 @@ Request example
  ```
  Password needs to have at least one Captial letter, one number and one special character.
 
- ### Login
+### Login
 
 #### POST /api/account/Login
 
@@ -88,6 +88,12 @@ Response example
 }]
  ```
 Response is an array of the unanswered challenges from other players.
+
+### Accept challenge
+
+#### POST /api/challenge/{id}
+
+Accepts the challenge with he specified id.
 
 ### Get games
 
@@ -205,6 +211,17 @@ Request example
 }
  ```
 A draw request is made which the other player can see then fetching his or her games. There is no endpoint for rejecting a draw since a user does that by making a move.
+
+###Get opponent
+
+####GET /api/challenge/{id}/opponent
+
+Gets the opponent in a specific game identified by the id for the currently logged in player
+
+response example
+{
+    "userName": "evahenriksson"
+}
 
 ### Get chess problem
 
