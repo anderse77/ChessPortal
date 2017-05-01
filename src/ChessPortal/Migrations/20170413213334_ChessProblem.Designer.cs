@@ -3,8 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using ChessPortal.Entities;
-using ChessPortal.Models.Chess;
+using ChessPortal.Data.Entities;
 
 namespace ChessPortal.Migrations
 {
@@ -125,7 +124,7 @@ namespace ChessPortal.Migrations
 
                     b.Property<string>("PlayerId");
 
-                    b.Property<int>("moveOffsetNumber");
+                    b.Property<int>("MoveOffsetNumber");
 
                     b.HasKey("Id");
 

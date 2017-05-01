@@ -1,29 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using ChessPortal.DataInterfaces;
-using ChessPortal.DtoProviders;
-using ChessPortal.Entities;
-using ChessPortal.Handlers;
-using ChessPortal.Models.Dtos;
-using ChessPortal.Models.Repositories;
-using Microsoft.AspNetCore.Authorization;
+﻿using ChessPortal.Data.Entities;
+using ChessPortal.Data.Handlers;
+using ChessPortal.Data.Repositories;
+using ChessPortal.Data.Repositories.Interfaces;
+using ChessPortal.Data.Services;
+using ChessPortal.Data.Settings;
+using ChessPortal.Infrastructure.DataInterfaces;
+using ChessPortal.Infrastructure.DtoProviders;
+using ChessPortal.Infrastructure.Dtos;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NLog.Extensions.Logging;
-using ChessPortal.Settings;
-using ChessPortal.Services;
 using Newtonsoft.Json.Serialization;
+using NLog.Extensions.Logging;
 
-namespace ChessPortal
+namespace ChessPortal.Web
 {
     public class Startup
     {
@@ -66,6 +61,7 @@ namespace ChessPortal
             services.AddScoped<IChallengeDtoProvider, ChallengeDtoProvider>();
             services.AddScoped<IGameDtoProvider, GameDtoProvider>();
             services.AddScoped<IChessProblemHandler, ChessProblemHandler>();
+            services.AddScoped<IAccountHandler, AccountHandler>();
 
             services.AddSingleton<IChessProblemService, ChessProblemService>();
         }
@@ -100,6 +96,7 @@ namespace ChessPortal
                 cfg.CreateMap<MoveEntity, MoveDto>();
                 cfg.CreateMap<DrawRequestDto, DrawRequestEntity>();
                 cfg.CreateMap<DrawRequestEntity, DrawRequestDto>();
+                cfg.CreateMap<ChessPlayer, ChessPlayerDto>();
             });
 
             app.UseIdentity();

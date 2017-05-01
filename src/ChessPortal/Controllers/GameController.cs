@@ -1,21 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using ChessPortal.DataInterfaces;
-using ChessPortal.Entities;
-using ChessPortal.Handlers;
-using ChessPortal.Models.Chess;
-using ChessPortal.Models.Dtos;
+﻿using ChessPortal.Infrastructure.DataInterfaces;
+using ChessPortal.Infrastructure.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
-namespace ChessPortal.Controllers
+namespace ChessPortal.Web.Controllers
 {
     [Route("api")]
     public class GameController : Controller
@@ -47,9 +39,8 @@ namespace ChessPortal.Controllers
 
             if (ModelState.IsValid)
             {
-                var challengeEntity = Mapper.Map<ChallengeEntity>(challengeDto);
                 var playerId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-                if (!_challengeHandler.SetupAndSaveChallenge(challengeEntity, playerId))
+                if (!_challengeHandler.SetupAndSaveChallenge(challengeDto, playerId))
                 {
                     return StatusCode(500, "A problem happened while handling your request.");
                 }
@@ -121,16 +112,16 @@ namespace ChessPortal.Controllers
 
             var playerId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            switch (await Task.Run(() => _challengeHandler.ValidateMove(move, move.ChallengeId, playerId)))
+            switch (await Task.Run(() => _challengeHandler.ValidateMove(move, playerId)))
             {
                 case ValidationResult.BlackLostOnTime:
-                    if (!await _challengeHandler.UpdateStats(Color.White, move.ChallengeId))
+                    if (!await _challengeHandler.UpdateStats(true, false, move.ChallengeId))
                     {
                         return StatusCode(500, "A problem happened while handling your request.");
                     }
                     return Ok("You lost on time");
                 case ValidationResult.WhiteLostOnTime:
-                    if (!await _challengeHandler.UpdateStats(Color.Black, move.ChallengeId))
+                    if (!await _challengeHandler.UpdateStats(false, false, move.ChallengeId))
                     {
                         return StatusCode(500, "A problem happened while handling your request.");
                     }
@@ -156,13 +147,13 @@ namespace ChessPortal.Controllers
                     }
                     break;
                 case ValidationResult.WhiteWon:
-                    if (!_challengeHandler.UpdateGame(move) || !await _challengeHandler.UpdateStats(Color.White, move.ChallengeId))
+                    if (!_challengeHandler.UpdateGame(move) || !await _challengeHandler.UpdateStats(true, false, move.ChallengeId))
                     {
                         return StatusCode(500, "A problem happened while handling your request.");
                     }
                     return Ok("You won!");
                 case ValidationResult.BlackWon:
-                    if (!_challengeHandler.UpdateGame(move) || !await _challengeHandler.UpdateStats(Color.Black, move.ChallengeId))
+                    if (!_challengeHandler.UpdateGame(move) || !await _challengeHandler.UpdateStats(false, false, move.ChallengeId))
                     {
                         return StatusCode(500, "A problem happened while handling your request.");
                     }
@@ -227,7 +218,7 @@ namespace ChessPortal.Controllers
                     case ValidationResult.Failed:
                     return BadRequest("You cannot accept your own draw request");
                     case ValidationResult.Success:
-                    if (!await _challengeHandler.UpdateStats(null, drawAcceptDto.ChallengeId))
+                    if (!await _challengeHandler.UpdateStats(false, true, drawAcceptDto.ChallengeId))
                     {
                         return StatusCode(500, "A problem happened while handling your request.");
                     }

@@ -1,13 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.4
+VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D759DA81-F4D7-494F-B44F-478D7FD0BF82}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F6C14B05-1BB1-49FF-9661-6785283D2B99}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessPortal", "src\ChessPortal\ChessPortal.csproj", "{5C6CEC5D-EC99-4819-BFE5-40EA8F390886}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessPortal.Web", "src\ChessPortal\ChessPortal.Web.csproj", "{5C6CEC5D-EC99-4819-BFE5-40EA8F390886}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChessPortal.Logic", "ChessPortal.Logic\ChessPortal.Logic.csproj", "{58503100-8E91-4D8A-A6BC-E3BC30498B9E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChessPortal.Data", "ChessPortal.Data\ChessPortal.Data.csproj", "{97FA7755-FD15-4813-80F6-D666F6EC0FFE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChessPortal.Infrastructure", "ChessPortal.Infrastructure\ChessPortal.Infrastructure.csproj", "{8DA36C6B-F2C4-4968-B1B0-9522588AD8A4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,11 +25,26 @@ Global
 		{5C6CEC5D-EC99-4819-BFE5-40EA8F390886}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C6CEC5D-EC99-4819-BFE5-40EA8F390886}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C6CEC5D-EC99-4819-BFE5-40EA8F390886}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58503100-8E91-4D8A-A6BC-E3BC30498B9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58503100-8E91-4D8A-A6BC-E3BC30498B9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58503100-8E91-4D8A-A6BC-E3BC30498B9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58503100-8E91-4D8A-A6BC-E3BC30498B9E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97FA7755-FD15-4813-80F6-D666F6EC0FFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97FA7755-FD15-4813-80F6-D666F6EC0FFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97FA7755-FD15-4813-80F6-D666F6EC0FFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97FA7755-FD15-4813-80F6-D666F6EC0FFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DA36C6B-F2C4-4968-B1B0-9522588AD8A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DA36C6B-F2C4-4968-B1B0-9522588AD8A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DA36C6B-F2C4-4968-B1B0-9522588AD8A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DA36C6B-F2C4-4968-B1B0-9522588AD8A4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{5C6CEC5D-EC99-4819-BFE5-40EA8F390886} = {D759DA81-F4D7-494F-B44F-478D7FD0BF82}
+		{58503100-8E91-4D8A-A6BC-E3BC30498B9E} = {D759DA81-F4D7-494F-B44F-478D7FD0BF82}
+		{97FA7755-FD15-4813-80F6-D666F6EC0FFE} = {D759DA81-F4D7-494F-B44F-478D7FD0BF82}
+		{8DA36C6B-F2C4-4968-B1B0-9522588AD8A4} = {D759DA81-F4D7-494F-B44F-478D7FD0BF82}
 	EndGlobalSection
 EndGlobal

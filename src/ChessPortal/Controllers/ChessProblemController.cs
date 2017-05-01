@@ -1,16 +1,12 @@
-﻿using ChessPortal.DataInterfaces;
-using ChessPortal.Handlers;
-using ChessPortal.Models.Dtos;
+﻿using ChessPortal.Infrastructure.DataInterfaces;
+using ChessPortal.Infrastructure.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace ChessPortal.Controllers
+namespace ChessPortal.Web.Controllers
 {
     [Route("api/problem")]
     public class ChessProblemController : Controller

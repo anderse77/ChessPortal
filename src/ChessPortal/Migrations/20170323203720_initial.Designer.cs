@@ -1,9 +1,9 @@
-﻿using System;
+﻿using ChessPortal.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using ChessPortal.Entities;
+using System;
 
 namespace ChessPortal.Migrations
 {

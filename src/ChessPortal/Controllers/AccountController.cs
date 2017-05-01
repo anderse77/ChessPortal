@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ChessPortal.Entities;
-using ChessPortal.Models.Dtos;
-using Microsoft.AspNetCore.Http;
+﻿using ChessPortal.Data.Entities;
+using ChessPortal.Infrastructure.Dtos;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Linq;
+using System.Threading.Tasks;
+using ChessPortal.Infrastructure.DataInterfaces;
 
-namespace ChessPortal.Controllers
+namespace ChessPortal.Web.Controllers
 {
     [Route("api/account")]
     public class AccountController : Controller
@@ -18,14 +15,17 @@ namespace ChessPortal.Controllers
         private readonly UserManager<ChessPlayer> _userManager;
         private readonly SignInManager<ChessPlayer> _signInManager;
         private readonly ILogger<AccountController> _logger;
+        private readonly IAccountHandler _accountHandler;
 
         public AccountController(UserManager<ChessPlayer> userManager,
             SignInManager<ChessPlayer> signInManager,
-            ILogger<AccountController> logger)
+            ILogger<AccountController> logger,
+            IAccountHandler accountHandler)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _accountHandler = accountHandler;
         }
 
         [HttpPost("register")]
@@ -33,8 +33,7 @@ namespace ChessPortal.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ChessPlayer { UserName = registerDto.UserName, Email = registerDto.Email };
-                var result = await _userManager.CreateAsync(user, registerDto.Password);
+                var result = await _accountHandler.CreateAccountAsync(registerDto);
                 if (result.Succeeded)
                 {
                     _logger.LogInformation(3, "User created a new account with password.");
