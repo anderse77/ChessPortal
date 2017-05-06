@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace ChessPortal.Migrations
+namespace ChessPortal.Data.Migrations
 {
     public partial class initial : Migration
     {
@@ -24,6 +24,8 @@ namespace ChessPortal.Migrations
                     NormalizedUserName = table.Column<string>(maxLength: 256, nullable: true),
                     NumberOfDrawnGames = table.Column<int>(nullable: false),
                     NumberOfLostGames = table.Column<int>(nullable: false),
+                    NumberOfProblemsFailed = table.Column<int>(nullable: false),
+                    NumberOfProblemsSolved = table.Column<int>(nullable: false),
                     NumberOfWonGames = table.Column<int>(nullable: false),
                     PasswordHash = table.Column<string>(nullable: true),
                     PhoneNumber = table.Column<string>(nullable: true),
@@ -80,6 +82,26 @@ namespace ChessPortal.Migrations
                     table.PrimaryKey("PK_Challenges", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Challenges_AspNetUsers_PlayerId",
+                        column: x => x.PlayerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ChessProblems",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    ChessProblemId = table.Column<string>(nullable: true),
+                    MoveOffsetNumber = table.Column<int>(nullable: false),
+                    PlayerId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChessProblems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ChessProblems_AspNetUsers_PlayerId",
                         column: x => x.PlayerId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -198,6 +220,31 @@ namespace ChessPortal.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "DrawRequests",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    ChallengeId = table.Column<Guid>(nullable: false),
+                    PlayerId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DrawRequests", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DrawRequests_Challenges_ChallengeId",
+                        column: x => x.ChallengeId,
+                        principalTable: "Challenges",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_DrawRequests_AspNetUsers_PlayerId",
+                        column: x => x.PlayerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Moves",
                 columns: table => new
                 {
@@ -209,6 +256,7 @@ namespace ChessPortal.Migrations
                     MoveDate = table.Column<DateTime>(nullable: false),
                     MoveNumber = table.Column<int>(nullable: false),
                     Piece = table.Column<int>(nullable: false),
+                    PromoteTo = table.Column<int>(nullable: true),
                     ToX = table.Column<int>(nullable: false),
                     ToY = table.Column<int>(nullable: false)
                 },
@@ -250,6 +298,21 @@ namespace ChessPortal.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_ChessProblems_PlayerId",
+                table: "ChessProblems",
+                column: "PlayerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DrawRequests_ChallengeId",
+                table: "DrawRequests",
+                column: "ChallengeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DrawRequests_PlayerId",
+                table: "DrawRequests",
+                column: "PlayerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Moves_ChallengeId",
                 table: "Moves",
                 column: "ChallengeId");
@@ -284,6 +347,12 @@ namespace ChessPortal.Migrations
         {
             migrationBuilder.DropTable(
                 name: "AcceptedChallenges");
+
+            migrationBuilder.DropTable(
+                name: "ChessProblems");
+
+            migrationBuilder.DropTable(
+                name: "DrawRequests");
 
             migrationBuilder.DropTable(
                 name: "Moves");

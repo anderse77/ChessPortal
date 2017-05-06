@@ -98,6 +98,7 @@ namespace ChessPortal.Web
                 cfg.CreateMap<DrawRequestDto, DrawRequestEntity>();
                 cfg.CreateMap<DrawRequestEntity, DrawRequestDto>();
                 cfg.CreateMap<ChessPlayer, ChessPlayerDto>();
+                cfg.CreateMap<ChessPlayerDto, ChessPlayer>();
             });
 
             app.UseIdentity();

@@ -4,20 +4,20 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using ChessPortal.Data.Entities;
+using ChessPortal.Logic.Chess;
 
-namespace ChessPortal.Migrations
+namespace ChessPortal.Data.Migrations
 {
     [DbContext(typeof(ChessPortalContext))]
-    [Migration("20170413213334_ChessProblem")]
-    partial class ChessProblem
+    partial class ChessPortalContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.1")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("ChessPortal.Entities.ChallengeAcceptEntity", b =>
+            modelBuilder.Entity("ChessPortal.Data.Entities.ChallengeAcceptEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
@@ -35,7 +35,7 @@ namespace ChessPortal.Migrations
                     b.ToTable("AcceptedChallenges");
                 });
 
-            modelBuilder.Entity("ChessPortal.Entities.ChallengeEntity", b =>
+            modelBuilder.Entity("ChessPortal.Data.Entities.ChallengeEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
@@ -55,7 +55,7 @@ namespace ChessPortal.Migrations
                     b.ToTable("Challenges");
                 });
 
-            modelBuilder.Entity("ChessPortal.Entities.ChessPlayer", b =>
+            modelBuilder.Entity("ChessPortal.Data.Entities.ChessPlayer", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
@@ -115,16 +115,16 @@ namespace ChessPortal.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("ChessPortal.Entities.ChessProblemEntity", b =>
+            modelBuilder.Entity("ChessPortal.Data.Entities.ChessProblemEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("ChessProblemId");
 
-                    b.Property<string>("PlayerId");
-
                     b.Property<int>("MoveOffsetNumber");
+
+                    b.Property<string>("PlayerId");
 
                     b.HasKey("Id");
 
@@ -133,7 +133,7 @@ namespace ChessPortal.Migrations
                     b.ToTable("ChessProblems");
                 });
 
-            modelBuilder.Entity("ChessPortal.Entities.DrawRequestEntity", b =>
+            modelBuilder.Entity("ChessPortal.Data.Entities.DrawRequestEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
@@ -151,7 +151,7 @@ namespace ChessPortal.Migrations
                     b.ToTable("DrawRequests");
                 });
 
-            modelBuilder.Entity("ChessPortal.Entities.MoveEntity", b =>
+            modelBuilder.Entity("ChessPortal.Data.Entities.MoveEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
@@ -289,47 +289,47 @@ namespace ChessPortal.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("ChessPortal.Entities.ChallengeAcceptEntity", b =>
+            modelBuilder.Entity("ChessPortal.Data.Entities.ChallengeAcceptEntity", b =>
                 {
-                    b.HasOne("ChessPortal.Entities.ChallengeEntity", "Challenge")
+                    b.HasOne("ChessPortal.Data.Entities.ChallengeEntity", "Challenge")
                         .WithMany()
                         .HasForeignKey("ChallengeId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("ChessPortal.Entities.ChessPlayer", "AcceptingPlayer")
+                    b.HasOne("ChessPortal.Data.Entities.ChessPlayer", "AcceptingPlayer")
                         .WithMany()
                         .HasForeignKey("PlayerId");
                 });
 
-            modelBuilder.Entity("ChessPortal.Entities.ChallengeEntity", b =>
+            modelBuilder.Entity("ChessPortal.Data.Entities.ChallengeEntity", b =>
                 {
-                    b.HasOne("ChessPortal.Entities.ChessPlayer", "Player")
+                    b.HasOne("ChessPortal.Data.Entities.ChessPlayer", "Player")
                         .WithMany("Challenges")
                         .HasForeignKey("PlayerId");
                 });
 
-            modelBuilder.Entity("ChessPortal.Entities.ChessProblemEntity", b =>
+            modelBuilder.Entity("ChessPortal.Data.Entities.ChessProblemEntity", b =>
                 {
-                    b.HasOne("ChessPortal.Entities.ChessPlayer", "Player")
+                    b.HasOne("ChessPortal.Data.Entities.ChessPlayer", "Player")
                         .WithMany()
                         .HasForeignKey("PlayerId");
                 });
 
-            modelBuilder.Entity("ChessPortal.Entities.DrawRequestEntity", b =>
+            modelBuilder.Entity("ChessPortal.Data.Entities.DrawRequestEntity", b =>
                 {
-                    b.HasOne("ChessPortal.Entities.ChallengeEntity", "Challenge")
+                    b.HasOne("ChessPortal.Data.Entities.ChallengeEntity", "Challenge")
                         .WithMany("DrawRequests")
                         .HasForeignKey("ChallengeId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("ChessPortal.Entities.ChessPlayer", "Player")
+                    b.HasOne("ChessPortal.Data.Entities.ChessPlayer", "Player")
                         .WithMany()
                         .HasForeignKey("PlayerId");
                 });
 
-            modelBuilder.Entity("ChessPortal.Entities.MoveEntity", b =>
+            modelBuilder.Entity("ChessPortal.Data.Entities.MoveEntity", b =>
                 {
-                    b.HasOne("ChessPortal.Entities.ChallengeEntity", "Challenge")
+                    b.HasOne("ChessPortal.Data.Entities.ChallengeEntity", "Challenge")
                         .WithMany("Moves")
                         .HasForeignKey("ChallengeId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -345,7 +345,7 @@ namespace ChessPortal.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("ChessPortal.Entities.ChessPlayer")
+                    b.HasOne("ChessPortal.Data.Entities.ChessPlayer")
                         .WithMany("Claims")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -353,7 +353,7 @@ namespace ChessPortal.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("ChessPortal.Entities.ChessPlayer")
+                    b.HasOne("ChessPortal.Data.Entities.ChessPlayer")
                         .WithMany("Logins")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -366,7 +366,7 @@ namespace ChessPortal.Migrations
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("ChessPortal.Entities.ChessPlayer")
+                    b.HasOne("ChessPortal.Data.Entities.ChessPlayer")
                         .WithMany("Roles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
