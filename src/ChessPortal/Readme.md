@@ -9,12 +9,8 @@ It can also fetch chess problems from Chessblunders.org and let the users solve 
 To Set up this project locally you need the following:
 Microsoft Windows (This method for installing the api is only tested on Windows 10)
 Visual Studio 2017
-1. Install IIS. Go to programs and features, choose Turn Windows features on or off and check IIS Management Console and World Wide Web Services.
-2. Install .NET Core Windows Server Hosting from https://go.microsoft.com/fwlink/?linkid=844461. Open a command-prompt as administrator
-and issue the commands "net stop was /y" and "net start w3svc" (Without the quotes).
-3. Install Web platform installer from http://go.microsoft.com/fwlink/?LinkId=255386.
-4. Open the projects solution file in visual studio 2017 and right click on the project and choose publish. Create a new profile and Set Publish method to Web deploy,
-Site name to Default Web Site/{name} where name is the name of our choice and Server to localhost(Or your own server). Click publish.
+Install Visual Studio 2017. Clone the git repo using VS 2017 and build. 
+Then hit f5 to start the project. Make sure that ChessPortal.Web is the startup project.
 
 
 ## API Reference
