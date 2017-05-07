@@ -44,7 +44,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\ChessPortal.Data\ChessPortal.Data.csproj" />
     <ProjectReference Include="..\..\ChessPortal.Infrastructure\ChessPortal.Infrastructure.csproj" />
-    <ProjectReference Include="..\..\ChessPortal.Logic\ChessPortal.Logic.csproj" />
   </ItemGroup>
 
   <ItemGroup>
