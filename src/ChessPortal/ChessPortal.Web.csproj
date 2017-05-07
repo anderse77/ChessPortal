@@ -26,6 +26,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.0.2" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="1.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+    <PackageReference Include="NLog" Version="5.0.0-beta07" />
     <PackageReference Include="NLog.Extensions.Logging" Version="1.0.0-rtm-beta3" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="1.0.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.0.2" />
@@ -33,6 +34,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="1.0.0" />
     <PackageReference Include="AutoMapper" Version="5.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="1.0.2" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="4.3.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,6 +45,12 @@
     <ProjectReference Include="..\..\ChessPortal.Data\ChessPortal.Data.csproj" />
     <ProjectReference Include="..\..\ChessPortal.Infrastructure\ChessPortal.Infrastructure.csproj" />
     <ProjectReference Include="..\..\ChessPortal.Logic\ChessPortal.Logic.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="nlog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

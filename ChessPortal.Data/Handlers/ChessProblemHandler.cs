@@ -12,7 +12,7 @@ namespace ChessPortal.Data.Handlers
     {
         private readonly IChessPortalRepository _chessPortalRepository;
         private readonly IChessProblemService _chessProblemService;
-        private const string SaveFailed = "Save failed";
+        private const string SaveFailed = "Error: Save failed";
 
         public ChessProblemHandler(
             IChessPortalRepository chessPortalRepository,
