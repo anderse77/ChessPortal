@@ -183,6 +183,12 @@ namespace ChessPortal.Data.Handlers
             return _chessPortalRepository.ChallengeIsCreatedOrAcceptedByPlayer(challengeId, playerId);
         }
 
+        public bool GameIsDrawn(Guid challengeId)
+        {
+            var challenge = _chessPortalRepository.GetChallenge(challengeId);
+            return challenge.Status == GameStatus.Draw;
+        }
+
         bool PlayerIsWhite(ChallengeEntity challenge, string playerId)
         {
             return (challenge.Color == Color.White &&

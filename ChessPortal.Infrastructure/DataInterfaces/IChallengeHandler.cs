@@ -37,5 +37,6 @@ namespace ChessPortal.Infrastructure.DataInterfaces
         bool DrawRequestExists(Guid challengeId);
         bool DeleteDrawRequestIfItExistsAndIsMadeByOtherPlayer(Guid challengeId, string playerId);
         bool ChallengeIsCreatedOrAcceptedByPlayer(Guid challengeId, string playerId);
+        bool GameIsDrawn(Guid challengeId);
     }
 }

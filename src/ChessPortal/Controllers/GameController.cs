@@ -270,6 +270,12 @@ namespace ChessPortal.Web.Controllers
                 return NotFound("No draw request has been made for this game");
             }
 
+            if (_challengeHandler.GameIsDrawn(drawAcceptDto.ChallengeId))
+            {
+                _logger.LogWarning("User tried to accept a draw request for a game that is already drawn.");
+                return BadRequest("This game is already drawn");
+            }
+
             var playerId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
             switch (_challengeHandler.ValidateDrawAccept(drawAcceptDto.ChallengeId, playerId))
