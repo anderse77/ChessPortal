@@ -26,5 +26,11 @@ namespace ChessPortal.Data.DtoProviders
                 ? Mapper.Map<ChessPlayerDto>(secondPlayer)
                 : Mapper.Map<ChessPlayerDto>(firstPlayer);
         }
+
+
+        public ChessPlayerDto GetPlayer(string playerId)
+        {
+            return Mapper.Map<ChessPlayerDto>(_repository.GetPlayerById(playerId));
+        }
     }
 }

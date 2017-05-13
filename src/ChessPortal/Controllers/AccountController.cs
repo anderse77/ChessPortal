@@ -4,8 +4,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using ChessPortal.Infrastructure.DataInterfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 
 namespace ChessPortal.Web.Controllers
 {
@@ -16,16 +19,22 @@ namespace ChessPortal.Web.Controllers
         private readonly SignInManager<ChessPlayer> _signInManager;
         private readonly ILogger<AccountController> _logger;
         private readonly IAccountHandler _accountHandler;
+        private readonly IChessPlayerDtoProvider _chessPlayerDtoProvider;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AccountController(UserManager<ChessPlayer> userManager,
             SignInManager<ChessPlayer> signInManager,
             ILogger<AccountController> logger,
-            IAccountHandler accountHandler)
+            IAccountHandler accountHandler,
+            IChessPlayerDtoProvider chessPlayerDtoProvider,
+            IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
             _accountHandler = accountHandler;
+            _chessPlayerDtoProvider = chessPlayerDtoProvider;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpPost("register")]
@@ -90,6 +99,15 @@ namespace ChessPortal.Web.Controllers
             await _signInManager.SignOutAsync();
             _logger.LogInformation("User logged out.");
             return Ok();
+        }
+
+        [HttpGet("player")]
+        [Authorize]
+        public IActionResult GetCurrentPlayerStats()
+        {
+            _logger.LogInformation("User fetches player stats.");
+            var playerId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            return Ok(_chessPlayerDtoProvider.GetPlayer(playerId));
         }
     }
 }
