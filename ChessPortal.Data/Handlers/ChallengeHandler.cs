@@ -219,7 +219,7 @@ namespace ChessPortal.Data.Handlers
             {
                 return ValidationResult.InvalidPromotion;
             }
-            if (MoveIsPawnPromotion(moveDto) && (!moveDto.PromoteTo.HasValue || moveDto.PromoteTo.Value == Piece.Pawn))
+            if (MoveIsPawnPromotion(moveDto) && (!moveDto.PromoteTo.HasValue || moveDto.PromoteTo.Value == Piece.Pawn || moveDto.PromoteTo.Value == Piece.King))
             {
                 return ValidationResult.NotEnoughPromotionInformation;
             }
