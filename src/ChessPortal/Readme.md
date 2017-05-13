@@ -216,7 +216,12 @@ Gets the opponent in a specific game identified by the id for the currently logg
 
 response example
 {
-    "userName": "evahenriksson"
+  "userName": "evahenriksson",
+  "numberOfWonGames": 1,
+  "numberOfLostGames": 0,
+  "numberOfDrawnGames": 8,
+  "numberOfProblemsSolved": 0,
+  "numberOfProblemsFailed": 0
 }
 
 ### Get chess problem
@@ -230,6 +235,22 @@ Gets a random chess problem from chessblunders.org and stores it to the database
 #### POST /api/problem/
 
 Same input as for POST /api/move. if the move is correct, the game proceeds to the next move in the problem. If the problem is solved, it is removed from the database and you can get a new random problem.
+
+### Get player stats
+
+#### GET /api/account/player
+
+Gets player stats
+
+response example
+{
+  "userName": "evahenriksson",
+  "numberOfWonGames": 1,
+  "numberOfLostGames": 0,
+  "numberOfDrawnGames": 8,
+  "numberOfProblemsSolved": 0,
+  "numberOfProblemsFailed": 0
+}
 
 ## Contributors
 

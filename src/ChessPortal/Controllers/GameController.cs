@@ -182,7 +182,7 @@ namespace ChessPortal.Web.Controllers
                     return BadRequest("You can only promote a pawn that goes to the last rank");
                 case ValidationResult.NotEnoughPromotionInformation:
                     _logger.LogWarning("User tried to promote a pawn without providing info about piece to promote to.");
-                    return BadRequest("You must promote your pawn to another piece when it reaches the last rank");
+                    return BadRequest("You must promote your pawn to a piece other than pawn or king when it reaches the last rank");
                 case ValidationResult.GameOver:
                     return BadRequest("This game is over");
                 case ValidationResult.Failed:
