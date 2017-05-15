@@ -189,6 +189,18 @@ namespace ChessPortal.Data.Handlers
             return challenge.Status == GameStatus.Draw;
         }
 
+        public bool GameIsOngoing(Guid challengeId)
+        {
+            var challenge = _chessPortalRepository.GetChallenge(challengeId);
+            return challenge.Status == GameStatus.Ongoing;
+        }
+
+        public async Task<bool> GiveUp(Guid challengeId, string playerId)
+        {
+            var challenge = _chessPortalRepository.GetChallenge(challengeId);
+            return await UpdateStats(!PlayerIsWhite(challenge, playerId), false, challengeId);
+        }
+
         bool PlayerIsWhite(ChallengeEntity challenge, string playerId)
         {
             return (challenge.Color == Color.White &&

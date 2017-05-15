@@ -297,5 +297,34 @@ namespace ChessPortal.Web.Controllers
             _logger.LogInformation("User accepted draw request.");
             return Ok("Draw has been accepted");
         }
+
+        [HttpPost("challenge/{id}/giveup")]
+        [Authorize]
+        public async Task<IActionResult> GiveUp(Guid challengeId)
+        {
+            if (!_challengeHandler.ChallengeExists(challengeId))
+            {
+                _logger.LogWarning("User tried to give up in a game that does not exist");
+                return NotFound("The challenge does not exist");
+            }
+            var playerId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            if (!_challengeHandler.ChallengeIsCreatedOrAcceptedByPlayer(challengeId, playerId))
+            {
+                _logger.LogWarning("User tried to give up in a game he or she is not playing");
+                return BadRequest("You cannot give up in a game you are not playing");
+            }
+            if (!_challengeHandler.GameIsOngoing(challengeId))
+            {
+                _logger.LogWarning("User tried to give up in game that is not an ongoing game.");
+                return BadRequest("You cannot give up in a game that is not ongoing");
+            }
+            if (!await _challengeHandler.GiveUp(challengeId, playerId))
+            {
+                _logger.LogError("Error occured while saving to the database.");
+                return StatusCode(500, "A problem happened while handling your request.");
+            }
+            _logger.LogInformation("User gave up");
+            return Ok("You gave up");
+        }
     }   
 }
