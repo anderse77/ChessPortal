@@ -300,25 +300,25 @@ namespace ChessPortal.Web.Controllers
 
         [HttpPost("challenge/{id}/giveup")]
         [Authorize]
-        public async Task<IActionResult> GiveUp(Guid challengeId)
+        public async Task<IActionResult> GiveUp(Guid id)
         {
-            if (!_challengeHandler.ChallengeExists(challengeId))
+            if (!_challengeHandler.ChallengeExists(id))
             {
                 _logger.LogWarning("User tried to give up in a game that does not exist");
                 return NotFound("The challenge does not exist");
             }
             var playerId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            if (!_challengeHandler.ChallengeIsCreatedOrAcceptedByPlayer(challengeId, playerId))
+            if (!_challengeHandler.ChallengeIsCreatedOrAcceptedByPlayer(id, playerId))
             {
                 _logger.LogWarning("User tried to give up in a game he or she is not playing");
                 return BadRequest("You cannot give up in a game you are not playing");
             }
-            if (!_challengeHandler.GameIsOngoing(challengeId))
+            if (!_challengeHandler.GameIsOngoing(id))
             {
                 _logger.LogWarning("User tried to give up in game that is not an ongoing game.");
                 return BadRequest("You cannot give up in a game that is not ongoing");
             }
-            if (!await _challengeHandler.GiveUp(challengeId, playerId))
+            if (!await _challengeHandler.GiveUp(id, playerId))
             {
                 _logger.LogError("Error occured while saving to the database.");
                 return StatusCode(500, "A problem happened while handling your request.");
