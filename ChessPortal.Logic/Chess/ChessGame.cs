@@ -163,6 +163,10 @@ namespace ChessPortal.Logic.Chess
             {
                 move = move.Replace("+", "");
             }
+            if (IsCheckMate(move))
+            {
+                move = move.Replace("#", "");
+            }
             try
             {
                 toX = (int)Enum.Parse(typeof(AlgebraicNotationLetters), move[move.Length - 2].ToString());
@@ -325,6 +329,11 @@ namespace ChessPortal.Logic.Chess
         bool IsCheck(string move)
         {
             return move.Any(c => c == '+');
+        }
+
+        bool IsCheckMate(string move)
+        {
+            return move.Any(c => c == '#');
         }
 
         bool Castle(string move, ChessPosition position, Color color)

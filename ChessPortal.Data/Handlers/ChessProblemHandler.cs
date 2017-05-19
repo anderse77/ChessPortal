@@ -73,6 +73,7 @@ namespace ChessPortal.Data.Handlers
             game = GetUpdatedGame(chessProblemEntity, chessProblemResponse);
             game.UpdateGame(chessProblemResponse.Data.ForcedLine[chessProblemEntity.MoveOffsetNumber]);
             var correctFen = game.History.Last().ToFenString();
+            ChessPlayer player;
             if (fenAfterMove == correctFen)
             {
 
@@ -83,9 +84,9 @@ namespace ChessPortal.Data.Handlers
                     {
                         return TryMoveResult.Error;
                     }
-                    var user = _chessPortalRepository.GetPlayerById(playerId);
-                    user.NumberOfProblemsSolved += 1;
-                    if (!await _chessPortalRepository.UpdateUser(user))
+                    player = _chessPortalRepository.GetPlayerById(playerId);
+                    player.NumberOfProblemsSolved += 1;
+                    if (!await _chessPortalRepository.UpdateUser(player))
                     {
                         return TryMoveResult.Error;
                     }
@@ -101,7 +102,8 @@ namespace ChessPortal.Data.Handlers
 
             }
             _chessPortalRepository.DeleteChessProblem(chessProblemEntity.Id);
-            var player = _chessPortalRepository.GetPlayerById(playerId);
+            player = _chessPortalRepository.GetPlayerById(playerId);
+            player.NumberOfProblemsFailed += 1;
             if (!await _chessPortalRepository.UpdateUser(player))
             {
                 return TryMoveResult.Error;
