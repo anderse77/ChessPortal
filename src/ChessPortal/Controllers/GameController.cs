@@ -70,26 +70,6 @@ namespace ChessPortal.Web.Controllers
             return Ok(challenges);
         }
 
-        [HttpGet("challenge/{id}/opponent")]
-        [Authorize]
-        public IActionResult GetOpponentForChallenge(Guid id)
-        {
-            if (!_challengeHandler.ChallengeExists(id))
-            {
-                _logger.LogWarning("User tried to get opponent for challenge that does not exist.");
-                return NotFound("The challenge does not exist");
-            }
-            var playerId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            if (!_challengeHandler.ChallengeIsCreatedOrAcceptedByPlayer(id, playerId))
-            {
-                _logger.LogWarning("User tried to get opponent in game that wasn't played by him or her.");
-                return BadRequest("This is not one of your games");
-            }
-            var opponent = _chessPlayerDtoProvider.GetOpponentForGame(id, playerId);
-            _logger.LogInformation("Fetched opponent for game.");
-            return Ok(opponent);
-        }
-
         [HttpPost("challenge/{id}")]
         [Authorize]
         public IActionResult AcceptChallenge(Guid id)
@@ -128,7 +108,6 @@ namespace ChessPortal.Web.Controllers
         public IActionResult GetGames()
         {
             var playerId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            var games = _gameDtoProvider.GetGames(playerId);
             _logger.LogInformation("fetched games for user.");
             return Ok(_gameDtoProvider.GetGames(playerId));
         }

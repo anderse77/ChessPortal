@@ -99,61 +99,45 @@ Gets all games that the currently logged in user is playing.
 
 Response example
  ```
-[{
+[
+  {
     "drawRequests": [],
-    "id": "4e37dab6-336c-4f02-8124-08d4722da5a3",
-    "color": 0,
-    "daysPerMove": 100,
-    "moves": [{
-            "id": "bb559b57-f596-435b-f719-08d47e737ebb",
-            "fromX": 4,
-            "toX": 4,
-            "fromY": 1,
-            "toY": 3,
-            "piece": 0,
-            "color": 0,
-            "moveNumber": 1,
-            "promoteTo": null,
-            "challengeId": "4e37dab6-336c-4f02-8124-08d4722da5a3"
-        },
-        {
-            "id": "0d59e190-240c-46fb-525c-08d47e778646",
-            "fromX": 4,
-            "toX": 4,
-            "fromY": 6,
-            "toY": 4,
-            "piece": 0,
-            "color": 1,
-            "moveNumber": 2,
-            "promoteTo": null,
-            "challengeId": "4e37dab6-336c-4f02-8124-08d4722da5a3"
-        },
-        {
-            "id": "aec1e0f7-0512-4700-ce15-08d47e786105",
-            "fromX": 6,
-            "toX": 5,
-            "fromY": 0,
-            "toY": 2,
-            "piece": 1,
-            "color": 0,
-            "moveNumber": 3,
-            "promoteTo": null,
-            "challengeId": "4e37dab6-336c-4f02-8124-08d4722da5a3"
-        },
-        {
-            "id": "ff0fb4fc-d708-4208-e189-08d47e7c2565",
-            "fromX": 1,
-            "toX": 2,
-            "fromY": 7,
-            "toY": 5,
-            "piece": 1,
-            "color": 1,
-            "moveNumber": 4,
-            "promoteTo": null,
-            "challengeId": "4e37dab6-336c-4f02-8124-08d4722da5a3"
-        }
-    ]
-}]
+    "id": "1106168d-dc05-4c57-7d81-08d494c4adc9",
+    "daysPerMove": 1,
+    "status": 4,
+    "moves": [
+      {
+        "id": "af67cd83-3096-484a-95fb-08d49f65133c",
+        "fromX": 4,
+        "toX": 4,
+        "fromY": 1,
+        "toY": 3,
+        "piece": 0,
+        "color": 0,
+        "moveNumber": 1,
+        "promoteTo": null,
+        "challengeId": "1106168d-dc05-4c57-7d81-08d494c4adc9"
+      }
+    ],
+    "whitePlayer": {
+      "userName": "perjansson",
+      "numberOfWonGames": 0,
+      "numberOfLostGames": 0,
+      "numberOfDrawnGames": 0,
+      "numberOfProblemsSolved": 2,
+      "numberOfProblemsFailed": 1
+    },
+    "blackPlayer": {
+      "userName": "evahenriksson",
+      "numberOfWonGames": 0,
+      "numberOfLostGames": 0,
+      "numberOfDrawnGames": 0,
+      "numberOfProblemsSolved": 0,
+      "numberOfProblemsFailed": 0
+    },
+    "whitesTurn": false
+  }
+]
  ```
 Response is an array of the games the player is playing. 
 fromX is the file(Number 0 is the a file and number 7 is the e-file.) the piece moves from and toX is the destination file for the piece.
@@ -208,22 +192,6 @@ Request example
  ```
 A draw request is made which the other player can see then fetching his or her games. There is no endpoint for rejecting a draw since a user does that by making a move.
 
-###Get opponent
-
-####GET /api/challenge/{id}/opponent
-
-Gets the opponent in a specific game identified by the id for the currently logged in player
-
-response example
-{
-  "userName": "evahenriksson",
-  "numberOfWonGames": 1,
-  "numberOfLostGames": 0,
-  "numberOfDrawnGames": 8,
-  "numberOfProblemsSolved": 0,
-  "numberOfProblemsFailed": 0
-}
-
 ### Get chess problem
 
 #### GET /api/problem/
@@ -234,7 +202,7 @@ Gets a random chess problem from chessblunders.org and stores it to the database
 
 #### POST /api/problem/
 
-Same input as for POST /api/move. if the move is correct, the game proceeds to the next move in the problem. If the problem is solved, it is removed from the database and you can get a new random problem.
+Same input as for POST /api/move except tha no challengeId is needed. if the move is correct, the game proceeds to the next move in the problem. If the problem is solved, it is removed from the database and you can get a new random problem.
 
 ### Get player stats
 

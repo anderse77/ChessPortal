@@ -18,15 +18,6 @@ namespace ChessPortal.Data.DtoProviders
             _challengeHandler = challengeHandler;
         }
 
-        public ChessPlayerDto GetOpponentForGame(Guid challengeId, string playerId)
-        {
-            var firstPlayer = _repository.GetPlayerForChallenge(challengeId, Color.White);
-            var secondPlayer = _repository.GetPlayerForChallenge(challengeId, Color.Black);
-            return firstPlayer.Id == playerId
-                ? Mapper.Map<ChessPlayerDto>(secondPlayer)
-                : Mapper.Map<ChessPlayerDto>(firstPlayer);
-        }
-
 
         public ChessPlayerDto GetPlayer(string playerId)
         {
