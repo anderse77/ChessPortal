@@ -8,6 +8,7 @@ namespace ChessPortal.Infrastructure.DataInterfaces
         SuccessProblemSolved,
         SuccessProblemNotSolved,
         Failed,
+        InvalidMove,
         Error
     }
 

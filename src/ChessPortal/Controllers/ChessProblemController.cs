@@ -58,6 +58,9 @@ namespace ChessPortal.Web.Controllers
                 case TryMoveResult.Failed:
                     _logger.LogInformation("User failed to solve the problem.");
                     return Ok("Incorrect move. You failed to solve the problem.");
+                    case TryMoveResult.InvalidMove:
+                        _logger.LogInformation("User made an invlaid move while trying to solve chess problem");
+                        return Ok("Invalid move. You may try again");
                 case TryMoveResult.SuccessProblemNotSolved:
                     _logger.LogInformation("User made correct move in the problem.");
                     return Ok(await _chessProblemHandler.GetChessProblemPositionForPlayer(playerId));

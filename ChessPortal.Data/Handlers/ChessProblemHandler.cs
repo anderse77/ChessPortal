@@ -68,7 +68,10 @@ namespace ChessPortal.Data.Handlers
                     Id = chessProblemEntity.ChessProblemId
                 });
             var game = GetUpdatedGame(chessProblemEntity, chessProblemResponse);
-            game.MakeMove(new Move(move.Piece, move.FromX, move.ToX, move.FromY, move.ToY, move.Color, move.PromoteTo));
+            if (!game.MakeMove(new Move(move.Piece, move.FromX, move.ToX, move.FromY, move.ToY, move.Color, move.PromoteTo)))
+            {
+                return TryMoveResult.InvalidMove;
+            }
             var fenAfterMove = game.History.Last().ToFenString();
             game = GetUpdatedGame(chessProblemEntity, chessProblemResponse);
             game.UpdateGame(chessProblemResponse.Data.ForcedLine[chessProblemEntity.MoveOffsetNumber]);
