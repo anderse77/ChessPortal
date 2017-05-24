@@ -74,6 +74,10 @@ namespace ChessPortal.Data.Handlers
             {
                 return PlayerIsWhite(challenge, playerId) ? ValidationResult.WhiteWon : ValidationResult.BlackWon;
             }
+            if (challenge.Status == GameStatus.Draw)
+            {
+                return ValidationResult.GameDrawn;
+            }
             return ValidationResult.Success;
         }
 

@@ -6,7 +6,7 @@ namespace ChessPortal.Logic.Chess
     [Flags]
     public enum Piece
     {
-        Pawn,
+        Pawn = 2,
         Knight,
         Bishop,
         Rook,

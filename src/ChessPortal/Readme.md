@@ -112,7 +112,7 @@ Response example
         "toX": 4,
         "fromY": 1,
         "toY": 3,
-        "piece": 0,
+        "piece": 2,
         "color": 0,
         "moveNumber": 1,
         "promoteTo": null,
@@ -142,7 +142,7 @@ Response example
 Response is an array of the games the player is playing. 
 fromX is the file(Number 0 is the a file and number 7 is the e-file.) the piece moves from and toX is the destination file for the piece.
 fromY is the zero-based rank from which the piece moves and toY is the zero-based destination rank.
-Piece is 0 for Pawn, 1 for Knight, 2 for Bishop, 3 for Rook, 4 for Queen and 5 for King. promoteTo is the same if the move is a pawn promotion.
+Piece is 2 for Pawn, 3 for Knight, 4 for Bishop, 5 for Rook, 6 for Queen and 7 for King. promoteTo is the same if the move is a pawn promotion.
 
 ### Make move
 
@@ -157,7 +157,7 @@ Request example
     "toX": 6,
     "fromY": 7,
     "toY": 7,
-    "piece": 5,
+    "piece": 7,
     "color": 1,
     "challengeId": "4e37dab6-336c-4f02-8124-08d4722da5a3"
 }
@@ -219,11 +219,3 @@ response example
   "numberOfProblemsSolved": 0,
   "numberOfProblemsFailed": 0
 }
-
-## Contributors
-
-Let people know how they can dive into the project, include important links to things like issue trackers, irc, twitter accounts if applicable.
-
-## License
-
-A short snippet describing the license (MIT, Apache, etc.)

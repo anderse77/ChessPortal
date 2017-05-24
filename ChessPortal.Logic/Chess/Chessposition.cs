@@ -54,7 +54,28 @@ namespace ChessPortal.Logic.Chess
 
         public override int GetHashCode()
         {
-            return _board.GetHashCode();
+            return GetHashCode(_board);
+        }
+
+        public int GetHashCode(Square[,] board)
+        {
+            if (board != null)
+            {
+                unchecked
+                {
+                    int hash = 17;
+
+                    foreach (var square in board)
+                    {
+                        hash = hash * 23 + ((square != null) ? square.GetHashCode() : 0);
+                    }
+
+                    return hash;
+                }
+            }
+
+            // if null, hash code is zero
+            return 0;
         }
 
         public static bool operator ==(ChessPosition lhs, ChessPosition rhs)

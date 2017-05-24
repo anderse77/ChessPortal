@@ -365,7 +365,7 @@ namespace ChessPortal.Logic.Chess
                 GameStatus = newPosition.WhiteToMove ? GameStatus.BlackWins : GameStatus.WhiteWins;
             }
 
-            if (IsDrawByStalemate(move.Color == Color.White ? Color.Black : Color.White) && IsDrawByThreeFoldRepetition() || IsDrawByFiftyMoveRule() || IsDrawByInsufficientMaterial())
+            if (IsDrawByStalemate(move.Color == Color.White ? Color.Black : Color.White) || IsDrawByThreeFoldRepetition() || IsDrawByFiftyMoveRule() || IsDrawByInsufficientMaterial())
             {
                 GameStatus = GameStatus.Draw;
             }
@@ -577,11 +577,18 @@ namespace ChessPortal.Logic.Chess
         bool IsDrawByThreeFoldRepetition()
         {
             var positionHashSet = new HashSet<ChessPosition>();
+            var repeatedPositionHashSet = new HashSet<ChessPosition>();
             foreach (var position in History)
             {
-                positionHashSet.Add(position);
+                if (!positionHashSet.Add(position))
+                {
+                    if (!repeatedPositionHashSet.Add(position))
+                    {
+                        return true;
+                    }
+                }
             }
-            return History.Count - positionHashSet.Count >= 2;
+            return false;
         }
 
         bool IsDrawByFiftyMoveRule()
@@ -598,7 +605,6 @@ namespace ChessPortal.Logic.Chess
                 var numberOfBlackPieces = position.Count(s => s.Color.HasValue && s.Color == Color.Black);
                 if (numberOfWhitePieces == 1 || numberOfBlackPieces == 1)
                 {
-                    var colorOfPlayerWithMorePieces = numberOfWhitePieces == 1 ? Color.Black : Color.White;
                     var highestNumberOfPieces = Math.Max(numberOfWhitePieces, numberOfBlackPieces);
                     if (highestNumberOfPieces == 2 &&
                         position.All(

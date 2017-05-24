@@ -174,7 +174,8 @@ namespace ChessPortal.Web.Controllers
                     }
                     break;
                 case ValidationResult.WhiteWon:
-                    if (!_challengeHandler.UpdateGame(move) || !await _challengeHandler.UpdateStats(true, false, move.ChallengeId))
+                    if (!_challengeHandler.UpdateGame(move) || 
+                        !await _challengeHandler.UpdateStats(true, false, move.ChallengeId))
                     {
                         _logger.LogError("Error occured while saving to the database.");
                         return StatusCode(500, "A problem happened while handling your request.");
@@ -182,13 +183,23 @@ namespace ChessPortal.Web.Controllers
                     _logger.LogInformation("User won the game.");
                     return Ok("You won!");
                 case ValidationResult.BlackWon:
-                    if (!_challengeHandler.UpdateGame(move) || !await _challengeHandler.UpdateStats(false, false, move.ChallengeId))
+                    if (!_challengeHandler.UpdateGame(move) || 
+                        !await _challengeHandler.UpdateStats(false, false, move.ChallengeId))
                     {
                         _logger.LogError("Error occured while saving to the database.");
                         return StatusCode(500, "A problem happened while handling your request.");
                     }
                     _logger.LogInformation("User won the game.");
                     return Ok("You won!");
+                case ValidationResult.GameDrawn:
+                    if (!_challengeHandler.UpdateGame(move) ||
+                        !await _challengeHandler.UpdateStats(false, true, move.ChallengeId))
+                    {
+                        _logger.LogError("Error occured while saving to the database.");
+                        return StatusCode(500, "A problem happened while handling your request.");
+                    }
+                    _logger.LogInformation("User made a move that lead to a draw.");
+                    return Ok("Game is drawn!");
 
             }
             _logger.LogInformation("User made a valid move.");
@@ -218,10 +229,10 @@ namespace ChessPortal.Web.Controllers
                 case ValidationResult.Failed:
                     _logger.LogWarning("User tried to request a draw in a game that has not been started or a game which was finished.");
                     return BadRequest("You can only request a move in an ongoing game");
-                    case ValidationResult.WrongPlayer:
+                case ValidationResult.WrongPlayer:
                     _logger.LogWarning("User tried to request a draw in a game he or she is not playing.");
                     return BadRequest("You must be playing the game in which you request a draw");
-                    case ValidationResult.Success:
+                case ValidationResult.Success:
                     if (!_challengeHandler.MakeDrawRequest(drawRequest))
                     {
                         _logger.LogError("Error occured while saving to the database.");
@@ -262,10 +273,10 @@ namespace ChessPortal.Web.Controllers
                 case ValidationResult.WrongPlayer:
                     _logger.LogWarning("User tried to accept a draw in a game he or she is not playing.");
                     return BadRequest("You cannot accept a draw request in a game you are not playing");
-                    case ValidationResult.Failed:
+                case ValidationResult.Failed:
                     _logger.LogWarning("User tried to accept own draw request.");
                     return BadRequest("You cannot accept your own draw request");
-                    case ValidationResult.Success:
+                case ValidationResult.Success:
                     if (!await _challengeHandler.UpdateStats(false, true, drawAcceptDto.ChallengeId))
                     {
                         _logger.LogError("Error occured while saving to the database.");
@@ -305,5 +316,5 @@ namespace ChessPortal.Web.Controllers
             _logger.LogInformation("User gave up");
             return Ok("You gave up");
         }
-    }   
+    }
 }

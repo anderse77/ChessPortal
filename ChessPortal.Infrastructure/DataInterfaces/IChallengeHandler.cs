@@ -18,6 +18,7 @@ namespace ChessPortal.Infrastructure.DataInterfaces
         OtherPlayersTurn,
         WhiteLostOnTime,
         BlackLostOnTime,
+        GameDrawn,
         Failed
     }
 
